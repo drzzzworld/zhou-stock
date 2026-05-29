@@ -16,19 +16,27 @@
             </div>
             <div class="nav-links">
                 <a href="#current-week">本周推荐</a>
+                <a href="#news">财经新闻</a>
                 <a href="#dashboard">投资看板</a>
                 <a href="#history">历史记录</a>
-                <a href="#methodology">选股逻辑</a>
-                <button class="btn-print" onclick="window.print()" title="打印报告">🖨️</button>
+                <button class="btn-print" onclick="window.print()" title="打印">🖨️</button>
             </div>
         </div>
     </nav>
+
+    <!-- Live Price Ticker -->
+    <div class="ticker-bar" id="ticker-bar">
+        <div class="ticker-track" id="ticker-track">
+            <span class="ticker-loading">⏳ 加载实时行情中...</span>
+        </div>
+        <span class="ticker-time" id="ticker-time">--</span>
+    </div>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <h1 class="hero-title">每周最看好的<span class="accent"> A 股</span></h1>
-            <p class="hero-subtitle">基于基本面、技术面、资金面三维分析，精选长期价值标的</p>
+            <p class="hero-subtitle">基本面 + 技术面 + 资金面 · 三维精选长期价值标的</p>
             <div class="hero-meta">
                 <span class="meta-badge">📅 更新时间：<span id="update-time">--</span></span>
                 <span class="meta-badge" id="relative-time">--</span>
@@ -47,17 +55,27 @@
                 </div>
             </div>
         </div>
-
-        <!-- Top Pick -->
         <div class="top-pick-container" id="top-pick"></div>
-
-        <!-- Secondary Picks -->
         <div class="secondary-picks" id="secondary-picks"></div>
     </section>
 
-    <!-- Dashboard Section -->
-    <section id="dashboard" class="section section-dark">
+    <!-- Financial News Section -->
+    <section id="news" class="section section-dark">
         <div class="section-header" style="max-width:1200px;margin:0 auto 40px;">
+            <h2 class="section-title">📰 每日财经新闻 TOP 10</h2>
+            <div class="section-actions">
+                <span class="news-update-time" id="news-time">--</span>
+                <button class="btn-refresh" onclick="refreshNews()" title="刷新新闻">🔄 刷新</button>
+            </div>
+        </div>
+        <div class="news-container" id="news-list" style="max-width:1200px;margin:0 auto;">
+            <div class="news-loading">⏳ 加载财经新闻中...</div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section">
+        <div class="section-header">
             <h2 class="section-title">📈 投资看板</h2>
             <p class="section-desc">历史推荐表现统计</p>
         </div>
@@ -65,20 +83,15 @@
     </section>
 
     <!-- History Section -->
-    <section id="history" class="section">
-        <div class="section-header">
+    <section id="history" class="section section-dark">
+        <div class="section-header" style="max-width:1200px;margin:0 auto 40px;">
             <h2 class="section-title">📋 历史推荐记录</h2>
             <p class="section-desc">追踪每周推荐，验证选股逻辑</p>
         </div>
-        <div class="history-table-wrapper">
+        <div class="history-table-wrapper" style="max-width:1200px;margin:0 auto;">
             <table class="history-table">
                 <thead>
-                    <tr>
-                        <th>周次</th>
-                        <th>首选</th>
-                        <th>推荐标的</th>
-                        <th>平均表现</th>
-                    </tr>
+                    <tr><th>周次</th><th>首选</th><th>推荐标的</th><th>平均表现</th></tr>
                 </thead>
                 <tbody id="history-tbody"></tbody>
             </table>
@@ -86,41 +99,25 @@
     </section>
 
     <!-- Methodology Section -->
-    <section id="methodology" class="section section-dark">
-        <div class="section-header" style="max-width:1200px;margin:0 auto 40px;">
+    <section id="methodology" class="section">
+        <div class="section-header">
             <h2 class="section-title">选股逻辑</h2>
-            <p class="section-desc">每周选股遵循的三维分析框架</p>
         </div>
-        <div class="methodology-grid" style="max-width:1200px;margin:0 auto;">
+        <div class="methodology-grid">
             <div class="method-card">
                 <div class="method-icon">📈</div>
                 <h3>基本面</h3>
-                <ul>
-                    <li>营收/利润增长趋势</li>
-                    <li>行业景气度与政策面</li>
-                    <li>估值分位（PE/PB 历史位置）</li>
-                    <li>ROE 与现金流质量</li>
-                </ul>
+                <ul><li>营收/利润增长趋势</li><li>行业景气度与政策面</li><li>估值分位（PE/PB 历史位置）</li><li>ROE 与现金流质量</li></ul>
             </div>
             <div class="method-card">
                 <div class="method-icon">📉</div>
                 <h3>技术面</h3>
-                <ul>
-                    <li>均线多头/空头排列</li>
-                    <li>MACD/KDJ 金叉死叉</li>
-                    <li>关键支撑/压力位</li>
-                    <li>量价配合关系</li>
-                </ul>
+                <ul><li>均线多头/空头排列</li><li>MACD/KDJ 金叉死叉</li><li>关键支撑/压力位</li><li>量价配合关系</li></ul>
             </div>
             <div class="method-card">
                 <div class="method-icon">💰</div>
                 <h3>资金面</h3>
-                <ul>
-                    <li>主力/北向资金流向</li>
-                    <li>融资融券变化</li>
-                    <li>龙虎榜机构席位</li>
-                    <li>筹码集中度与获利盘</li>
-                </ul>
+                <ul><li>主力/北向资金流向</li><li>融资融券变化</li><li>龙虎榜机构席位</li><li>筹码集中度与获利盘</li></ul>
             </div>
         </div>
     </section>
@@ -129,14 +126,18 @@
     <section class="disclaimer">
         <div class="disclaimer-content">
             <strong>⚠️ 免责声明</strong>
-            <p>本网站所有内容仅为个人基于公开信息的分析判断，不构成任何形式的投资建议。股市有风险，投资需谨慎。所有买卖决策请根据您自身的风险承受能力独立做出，盈亏自负。</p>
+            <p>本网站所有内容仅为个人基于公开信息的分析判断，不构成任何形式的投资建议。股市有风险，投资需谨慎。</p>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2026 舟-自用股票网 · 个人研究分享</p>
+        <p>&copy; 2026 舟-自用股票网 · 个人研究分享 · 行情数据来源：新浪财经 · 新闻来源：东方财富</p>
     </footer>
+
+    <!-- News Detail Modal -->
+    <div class="modal-overlay" id="news-modal-overlay">
+        <div class="modal-container" id="news-modal-content"></div>
+    </div>
 
     <!-- Stock Detail Modal -->
     <div class="modal-overlay" id="modal-overlay">

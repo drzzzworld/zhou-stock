@@ -1,5 +1,17 @@
 const STOCK_DATA = {
   "lastUpdated": "2026-05-28T22:00:00Z",
+  "trackedStocks": [
+    {"name": "立昂微", "code": "sh605358", "sector": "半导体"},
+    {"name": "格力电器", "code": "sz000651", "sector": "家电"},
+    {"name": "药明康德", "code": "sh603259", "sector": "医药"},
+    {"name": "巨星科技", "code": "sz002444", "sector": "出海"},
+    {"name": "西安奕材", "code": "sh688783", "sector": "半导体"},
+    {"name": "粤电力A", "code": "sz000539", "sector": "电力"},
+    {"name": "众源新材", "code": "sh603527", "sector": "材料"},
+    {"name": "宁德时代", "code": "sz300750", "sector": "新能源"},
+    {"name": "中芯国际", "code": "sh688981", "sector": "半导体"},
+    {"name": "贵州茅台", "code": "sh600519", "sector": "白酒"}
+  ],
   "currentWeek": {
     "weekLabel": "2026年第22周 (5/25 - 5/29)",
     "weekId": "2026-W22",
