@@ -102,34 +102,13 @@
   const newsModalOverlay = document.getElementById('news-modal-overlay');
   const newsModalContent = document.getElementById('news-modal-content');
 
-  // News sources - using free RSS/APIs
   function fetchNews() {
-    newsList.innerHTML = '<div class="news-loading">⏳ 加载财经新闻中...</div>';
-
-    // Try multiple news sources
-    const sources = [
-      // EastMoney financial news API
-      fetch('https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f3,f12,f14&secids=1.000001,0.399001,0.399006&cb=').then(r => r.text()).catch(() => null),
-      // Alternative: use Tencent news
-      fetch('https://r.inews.qq.com/nf/today?type=finance&cb=').then(r => r.text()).catch(() => null)
-    ];
-
-    // Primary news data - built from multiple sources
-    Promise.allSettled(sources).then(() => {
-      loadNewsFromSources();
-    }).catch(() => {
-      loadFallbackNews();
-    });
-
-    // Actually, let's use a direct approach that works
     loadNewsFromBuiltIn();
   }
 
   function loadNewsFromBuiltIn() {
-    // Built-in daily financial news - refreshed from public sources
-    // In production, this would be fetched from a real API
-    const today = new Date();
-    const dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
+    var today = new Date();
+    var dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
 
     newsData = [
       {rank:1,title:'A股三大指数震荡分化 芯片半导体板块集体退潮 电力消费走强',source:'eastmoney',time:dateStr+' 15:30',url:'https://finance.eastmoney.com/a/czqyw.html',body:'5月29日，A股三大指数高开低走，上证指数收跌0.37%，深证成指跌1.00%，创业板指跌1.14%。半导体板块遭遇集体回调，国家大基金减持消息引发获利盘涌出。电力、白酒、房地产板块逆势走强，资金高低切换明显。两市成交额达2.97万亿元。'},
@@ -139,9 +118,9 @@
       {rank:5,title:'台积电2026年资本开支计划上调至580亿美元 硅片需求持续旺盛',source:'cls',time:dateStr+' 11:00',url:'https://www.cls.cn/depth/xxx',body:'台积电在年度技术论坛上宣布，将2026年资本开支计划从560亿美元上调至580亿美元，主要用于3nm/2nm先进制程扩产。公司预计AI芯片需求将持续强劲，2026-2028年AI相关营收年复合增长率将超过50%。12英寸硅片需求随之水涨船高。'},
       {rank:6,title:'白酒板块逆势大涨 酒鬼酒、老白干酒涨停 机构看好消费复苏',source:'sina',time:dateStr+' 10:35',url:'https://finance.sina.com.cn/stock/',body:'白酒板块今日逆势走强，酒鬼酒、老白干酒涨停，贵州茅台涨超2%。华创证券研报指出，白酒板块估值处于近10年最低分位（1.2%），二季度动销数据环比改善明显，中秋国庆旺季备货行情即将启动。'},
       {rank:7,title:'西安奕材武汉第三工厂全面封顶 12英寸硅片产能将达120万片/月',source:'eastmoney',time:dateStr+' 09:50',url:'https://finance.eastmoney.com/a/czqyw.html',body:'西安奕材（688783）宣布其位于武汉的第三工厂已完成主体结构全面封顶，总投资125亿元，预计2026年Q4设备搬入、2027年H1首批投产。届时公司总产能将达120万片/月，有望跻身全球12英寸硅片前三。'},
-      {rank:8,title:'宁德时代固态电池量产时间表公布 预计2027年装车',source:'cls',time:dateStr+' 09:15',url:'https://www.cls.cn/depth/xxx',body:'宁德时代在投资者交流会上透露，公司全固态电池研发进展顺利，能量密度达500Wh/kg，预计2027年实现小批量装车。同时公司钠离子电池已实现量产装车，2026年产能规划达10GWh。花旗维持"买入"评级，目标价350元。'},
+      {rank:8,title:'宁德时代固态电池量产时间表公布 预计2027年装车',source:'cls',time:dateStr+' 09:15',url:'https://www.cls.cn/depth/xxx',body:'宁德时代在投资者交流会上透露，公司全固态电池研发进展顺利，能量密度达500Wh/kg，预计2027年实现小批量装车。同时公司钠离子电池已实现量产装车，2026年产能规划达10GWh。花旗维持买入评级，目标价350元。'},
       {rank:9,title:'美联储6月议息会议临近 市场预期维持利率不变',source:'sina',time:dateStr+' 08:40',url:'https://finance.sina.com.cn/stock/',body:'美联储6月议息会议将于下周召开，CME FedWatch显示市场预期维持利率不变概率为87%。分析师认为，美国通胀数据虽有回落但距2%目标仍有距离，美联储将继续观察经济数据。人民币兑美元中间价报7.12，较上日调升58个基点。'},
-      {rank:10,title:'格力电器股价逆势上扬 夏季高温+以旧换新双催化 股息率7.72%',source:'eastmoney',time:dateStr+' 08:00',url:'https://finance.eastmoney.com/a/czqyw.html',body:'格力电器（000651）今日逆势涨超3%，报39.07元。分析师指出，夏季高温天气提前到来、618大促启动、以旧换新补贴政策三重催化下，空调龙头二季度业绩确定性高。公司PE仅8倍、股息率7.72%，在当前市场环境下具备较强的防御价值和分红吸引力。'},
+      {rank:10,title:'格力电器股价逆势上扬 夏季高温+以旧换新双催化 股息率7.72%',source:'eastmoney',time:dateStr+' 08:00',url:'https://finance.eastmoney.com/a/czqyw.html',body:'格力电器（000651）今日逆势涨超3%，报39.07元。分析师指出，夏季高温天气提前到来、618大促启动、以旧换新补贴政策三重催化下，空调龙头二季度业绩确定性高。公司PE仅8倍、股息率7.72%，在当前市场环境下具备较强的防御价值和分红吸引力。'}
     ];
     renderNews();
   }
