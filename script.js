@@ -27,49 +27,51 @@
 
   function updateTicker() {
     if (!trackedStocks || trackedStocks.length === 0) return;
+
+    // Use Tencent stock API - CORS friendly via JSONP
+    const prefixMap = {};
+    trackedStocks.forEach(s => {
+      if (!prefixMap[s.code]) prefixMap[s.code] = s.name;
+    });
     const codes = trackedStocks.map(s => s.code).join(',');
-    const script = document.createElement('script');
-    const callbackName = '_ticker_cb_' + Date.now();
-    window[callbackName] = function(result) {
-      if (!result) return;
-      const items = result.split('\n');
-      const newPrices = {};
-      items.forEach(line => {
-        if (!line.trim()) return;
-        const parts = line.split(',');
-        if (parts.length < 4) return;
-        const codePart = parts[0].split('_');
-        let code = '';
-        if (codePart.length >= 3) {
-          code = (codePart[2] || '').replace('"','').replace("'",'');
+
+    // Try primary: Tencent API via fetch (returns JS string)
+    fetch('https://web.sqt.gtimg.cn/utf8/q=' + codes)
+      .then(r => r.text())
+      .then(data => {
+        const newPrices = {};
+        trackedStocks.forEach(s => {
+          const prefix = s.code.startsWith('sh') ? 'sh' : 'sz';
+          const codeNum = s.code.replace('sh', '').replace('sz', '');
+          const re = new RegExp('v_' + prefix + codeNum + '="([^"]+)"');
+          const match = data.match(re);
+          if (match) {
+            const fields = match[1].split('~');
+            // fields: name, code, current_price, prev_close, open, volume...
+            const name = fields[1] || s.name;
+            const price = parseFloat(fields[3]);
+            const prevClose = parseFloat(fields[4]);
+            if (!isNaN(price) && !isNaN(prevClose) && prevClose > 0) {
+              const change = price - prevClose;
+              const changePct = (change / prevClose) * 100;
+              newPrices[name || s.name] = { code: s.code, price, change, changePct };
+            }
+          }
+        });
+        if (Object.keys(newPrices).length > 0) {
+          stockPrices = newPrices;
+          renderTicker();
+          document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
+          try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
         }
-        const name = (parts[1] || '').replace(/\s/g,'');
-        const price = parseFloat(parts[3]);
-        const prevClose = parseFloat(parts[2]);
-        const change = price - prevClose;
-        const changePct = prevClose > 0 ? (change / prevClose * 100) : 0;
-        const market = (parts[0] || '').includes('sh') ? 'sh' : 'sz';
-        const shortCode = parts[0].split('_')[2] || code;
-        if (name && !isNaN(price)) {
-          newPrices[name] = { code: market + shortCode, price, change, changePct };
-        }
+      })
+      .catch(() => {
+        // Fallback: try cached prices
+        try {
+          const cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
+          if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
+        } catch(e) {}
       });
-      stockPrices = newPrices;
-      renderTicker();
-      document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
-      try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
-    };
-    const url = 'https://hq.sinajs.cn/list=' + codes;
-    script.src = url + '&callback=' + callbackName;
-    script.onerror = function() {
-      // Try cached
-      try {
-        const cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
-        if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
-      } catch(e) {}
-    };
-    document.head.appendChild(script);
-    setTimeout(() => { if (script.parentNode) script.parentNode.removeChild(script); }, 5000);
   }
 
   function renderTicker() {
