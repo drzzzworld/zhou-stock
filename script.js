@@ -96,16 +96,16 @@
   // Check if weekend (market closed Sat/Sun)
   function isWeekend() { var d = new Date(); return d.getDay() === 0 || d.getDay() === 6; }
 
-  // Init: load cached prices first, then fetch if not weekend
+  // Init: load cache first, always fetch once, then skip on weekends
   function initTicker() {
     try {
       var cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
       if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
     } catch(e) {}
-    if (!isWeekend()) updateTicker();
+    updateTicker(); // Always fetch once on page load
   }
   initTicker();
-  // Update every 5 minutes on weekdays
+  // Auto-refresh every 5 min, skip on weekends
   setInterval(function() { if (!isWeekend()) updateTicker(); }, 300000);
 
   // ===== B. FINANCIAL NEWS =====
