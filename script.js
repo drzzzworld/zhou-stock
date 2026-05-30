@@ -93,9 +93,20 @@
     tickerTrack.style.animationDuration = Math.max(20, entries.length * 5) + 's';
   }
 
-  // Initial load + refresh every 5 minutes
-  updateTicker();
-  setInterval(updateTicker, 300000);
+  // Check if weekend (market closed Sat/Sun)
+  function isWeekend() { var d = new Date(); return d.getDay() === 0 || d.getDay() === 6; }
+
+  // Init: load cached prices first, then fetch if not weekend
+  function initTicker() {
+    try {
+      var cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
+      if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
+    } catch(e) {}
+    if (!isWeekend()) updateTicker();
+  }
+  initTicker();
+  // Update every 30 minutes on weekdays
+  setInterval(function() { if (!isWeekend()) updateTicker(); }, 1800000);
 
   // ===== B. FINANCIAL NEWS =====
   let newsData = [];
