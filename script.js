@@ -35,10 +35,12 @@
     });
     const codes = trackedStocks.map(s => s.code).join(',');
 
-    // Try primary: Tencent API via fetch (returns JS string)
-    fetch('https://web.sqt.gtimg.cn/utf8/q=' + codes)
-      .then(r => r.text())
-      .then(data => {
+    // Use CORS proxy to access Tencent stock API from any domain
+    var apiUrl = 'https://web.sqt.gtimg.cn/utf8/q=' + codes;
+    var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl);
+    fetch(proxyUrl)
+      .then(function(r) { return r.text(); })
+      .then(function(data) {
         const newPrices = {};
         trackedStocks.forEach(s => {
           const prefix = s.code.startsWith('sh') ? 'sh' : 'sz';
