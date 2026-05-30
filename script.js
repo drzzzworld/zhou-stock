@@ -105,8 +105,8 @@
     if (!isWeekend()) updateTicker();
   }
   initTicker();
-  // Update every 30 minutes on weekdays
-  setInterval(function() { if (!isWeekend()) updateTicker(); }, 1800000);
+  // Update every 5 minutes on weekdays
+  setInterval(function() { if (!isWeekend()) updateTicker(); }, 300000);
 
   // ===== B. FINANCIAL NEWS =====
   let newsData = [];
