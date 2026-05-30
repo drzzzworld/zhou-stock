@@ -356,16 +356,40 @@
     observer.observe(el);
   });
 
-  // ===== K. PERIODIC PRICE UPDATE IN CARDS =====
-  setInterval(function() {
+  // ===== K. SYNC LIVE PRICES TO ALL CARDS =====
+  function syncPricesToCards() {
     if (Object.keys(stockPrices).length === 0) return;
-    // Update top pick price
-    const tpName = currentWeek.topPick.name;
+    // Update top pick
+    var tpName = currentWeek.topPick.name;
     if (stockPrices[tpName]) {
-      const el = document.getElementById('live-price-' + currentWeek.topPick.code);
-      if (el) el.textContent = stockPrices[tpName].price.toFixed(2) + ' 元';
+      var el = document.getElementById('live-price-' + currentWeek.topPick.code);
+      if (el) {
+        var p = stockPrices[tpName];
+        var arrow = p.changePct >= 0 ? '↑' : '↓';
+        el.innerHTML = p.price.toFixed(2) + ' 元 <span style=\"font-size:14px;color:' + (p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)') + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</span>';
+      }
     }
-  }, 300000);
+    // Update secondary picks
+    currentWeek.secondaryPicks.forEach(function(sp) {
+      if (stockPrices[sp.name]) {
+        var p = stockPrices[sp.name];
+        var cards = document.querySelectorAll('.pick-card');
+        cards.forEach(function(card) {
+          if (card.dataset.code === sp.code) {
+            var valEl = card.querySelector('.pick-metric-value');
+            if (valEl) {
+              var arrow = p.changePct >= 0 ? '↑' : '↓';
+              valEl.innerHTML = p.price.toFixed(2) + ' / <span style=\"color:var(--accent-green)\">' + sp.targetPrice + '</span> <span style=\"font-size:12px;color:' + (p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)') + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</span>';
+            }
+          }
+        });
+      }
+    });
+  }
+  // Initial sync when prices arrive, then every time ticker updates
+  var origRenderTicker = renderTicker;
+  renderTicker = function() { origRenderTicker(); syncPricesToCards(); };
+  setInterval(syncPricesToCards, 300000);
 
   console.log('🚀 舟-自用股票网 v2.0 loaded');
   console.log('   📊 ' + totalPicks + ' picks | ' + totalWeeks + ' weeks | 🏆 ' + winRate + '% win rate');
