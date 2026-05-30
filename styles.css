@@ -565,7 +565,7 @@ body::before{
 }
 
 /* ===== Page Entrance Animation ===== */
-.pick-card,.method-card,.stat-card,.news-card,.history-table tbody tr{
+.pick-card,.method-card,.stat-card,.history-table tbody tr{
   opacity:0;transform:translateY(16px);
   transition:opacity 0.5s var(--ease-out),transform 0.5s var(--ease-out);
 }
