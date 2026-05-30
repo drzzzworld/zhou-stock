@@ -189,22 +189,25 @@
   function loadNewsFromBuiltIn() {
     var today = new Date();
     var dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-    newsData = [
-      {rank:1,title:'A股三大指数震荡分化 芯片半导体板块集体退潮 电力消费走强',source:'eastmoney',time:dateStr+' 15:30',url:'https://finance.eastmoney.com/a/czqyw.html',body:'5月29日，A股三大指数高开低走，上证指数收跌0.37%，深证成指跌1.00%，创业板指跌1.14%。半导体板块遭遇集体回调，国家大基金减持消息引发获利盘涌出。电力、白酒、房地产板块逆势走强，资金高低切换明显。两市成交额达2.97万亿元。'},
-      {rank:2,title:'国家大基金高位减持沪硅产业、中芯国际 半导体板块承压',source:'cls',time:dateStr+' 14:15',url:'https://www.cls.cn/depth/xxx',body:'国家集成电路产业投资基金（大基金）宣布减持沪硅产业不超过2%股份、中芯国际不超过1%股份。这是大基金2026年以来的首次减持动作，引发市场对半导体板块估值过热的担忧。受此消息影响，沪硅产业跌超8%，中芯国际跌超6%。'},
-      {rank:3,title:'南方电网电力负荷连续三日刷新历史纪录 电力股掀涨停潮',source:'sina',time:dateStr+' 13:45',url:'https://finance.sina.com.cn/stock/',body:'受持续高温天气影响，南方电网电力负荷连续第三天刷新历史最高纪录。6月空调用电高峰提前到来，多地已启动有序用电预案。电力板块今日大涨，粤电力A、华电能源、晋控电力等多股涨停。机构预计今夏电力供需偏紧格局将持续。'},
-      {rank:4,title:'618大促启动 家电以旧换新补贴加码 空调销量同比增45%',source:'eastmoney',time:dateStr+' 12:20',url:'https://finance.eastmoney.com/a/czqyw.html',body:'各大电商平台618大促正式启动，家电品类成为核心战场。根据京东、天猫数据，空调品类预售量同比增长45%，冰箱、洗衣机增长30%+。商务部以旧换新补贴政策持续发力，每台空调最高补贴800元。格力、美的、海尔等龙头品牌受益显著。'},
-      {rank:5,title:'台积电2026年资本开支计划上调至580亿美元 硅片需求持续旺盛',source:'cls',time:dateStr+' 11:00',url:'https://www.cls.cn/depth/xxx',body:'台积电在年度技术论坛上宣布，将2026年资本开支计划从560亿美元上调至580亿美元，主要用于3nm/2nm先进制程扩产。公司预计AI芯片需求将持续强劲，2026-2028年AI相关营收年复合增长率将超过50%。12英寸硅片需求随之水涨船高。'},
-      {rank:6,title:'白酒板块逆势大涨 酒鬼酒、老白干酒涨停 机构看好消费复苏',source:'sina',time:dateStr+' 10:35',url:'https://finance.sina.com.cn/stock/',body:'白酒板块今日逆势走强，酒鬼酒、老白干酒涨停，贵州茅台涨超2%。华创证券研报指出，白酒板块估值处于近10年最低分位（1.2%），二季度动销数据环比改善明显，中秋国庆旺季备货行情即将启动。'},
-      {rank:7,title:'西安奕材武汉第三工厂全面封顶 12英寸硅片产能将达120万片/月',source:'eastmoney',time:dateStr+' 09:50',url:'https://finance.eastmoney.com/a/czqyw.html',body:'西安奕材（688783）宣布其位于武汉的第三工厂已完成主体结构全面封顶，总投资125亿元，预计2026年Q4设备搬入、2027年H1首批投产。届时公司总产能将达120万片/月，有望跻身全球12英寸硅片前三。'},
-      {rank:8,title:'宁德时代固态电池量产时间表公布 预计2027年装车',source:'cls',time:dateStr+' 09:15',url:'https://www.cls.cn/depth/xxx',body:'宁德时代在投资者交流会上透露，公司全固态电池研发进展顺利，能量密度达500Wh/kg，预计2027年实现小批量装车。同时公司钠离子电池已实现量产装车，2026年产能规划达10GWh。花旗维持买入评级，目标价350元。'},
-      {rank:9,title:'美联储6月议息会议临近 市场预期维持利率不变',source:'sina',time:dateStr+' 08:40',url:'https://finance.sina.com.cn/stock/',body:'美联储6月议息会议将于下周召开，CME FedWatch显示市场预期维持利率不变概率为87%。分析师认为，美国通胀数据虽有回落但距2%目标仍有距离，美联储将继续观察经济数据。人民币兑美元中间价报7.12，较上日调升58个基点。'},
-      {rank:10,title:'格力电器股价逆势上扬 夏季高温+以旧换新双催化 股息率7.72%',source:'eastmoney',time:dateStr+' 08:00',url:'https://finance.eastmoney.com/a/czqyw.html',body:'格力电器（000651）今日逆势涨超3%，报39.07元。分析师指出，夏季高温天气提前到来、618大促启动、以旧换新补贴政策三重催化下，空调龙头二季度业绩确定性高。公司PE仅8倍、股息率7.72%，在当前市场环境下具备较强的防御价值和分红吸引力。'}
+    var titles = [
+      'A股三大指数震荡分化 芯片半导体板块集体退潮 电力消费走强',
+      '国家大基金高位减持沪硅产业 半导体板块承压',
+      '南方电网电力负荷连续刷新纪录 电力股掀涨停潮',
+      '618大促启动 家电以旧换新补贴加码 空调销量大增',
+      '台积电资本开支上调至580亿美元 硅片需求持续旺盛',
+      '白酒板块逆势大涨 酒鬼酒老白干酒涨停 机构看好消费复苏',
+      '西安奕材武汉第三工厂全面封顶 12英寸硅片产能将达120万片',
+      '宁德时代固态电池量产时间表公布 预计2027年装车',
+      '美联储6月议息会议临近 市场预期维持利率不变',
+      '格力电器股价逆势上扬 夏季高温以旧换新双催化'
     ];
+    newsData = titles.map(function(t, i) {
+      return {rank:i+1, title:t, source:'sina', time:dateStr, url:'https://www.baidu.com/s?wd='+encodeURIComponent(t), body:'点击"查看原文"通过百度搜索完整新闻。'};
+    });
     renderNews();
   }
 
-  function renderNews() {
+    function renderNews() {
     newsList.innerHTML = newsData.map(n => {
       let rankClass = ''; if (n.rank === 1) rankClass = 'r1'; else if (n.rank === 2) rankClass = 'r2'; else if (n.rank === 3) rankClass = 'r3';
       let srcClass = 'source-eastmoney'; if (n.source === 'sina') srcClass = 'source-sina'; else if (n.source === 'cls') srcClass = 'source-cls';
