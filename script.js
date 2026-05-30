@@ -28,52 +28,65 @@
   function updateTicker() {
     if (!trackedStocks || trackedStocks.length === 0) return;
 
-    // Use Tencent stock API - CORS friendly via JSONP
-    const prefixMap = {};
-    trackedStocks.forEach(s => {
-      if (!prefixMap[s.code]) prefixMap[s.code] = s.name;
-    });
-    const codes = trackedStocks.map(s => s.code).join(',');
+    var codes = trackedStocks.map(function(s) { return s.code; }).join(',');
 
-    // Use CORS proxy to access Tencent stock API from any domain
-    var apiUrl = 'https://web.sqt.gtimg.cn/utf8/q=' + codes;
-    var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(apiUrl);
-    fetch(proxyUrl)
-      .then(function(r) { return r.text(); })
-      .then(function(data) {
-        const newPrices = {};
-        trackedStocks.forEach(s => {
-          const prefix = s.code.startsWith('sh') ? 'sh' : 'sz';
-          const codeNum = s.code.replace('sh', '').replace('sz', '');
-          const re = new RegExp('v_' + prefix + codeNum + '="([^"]+)"');
-          const match = data.match(re);
-          if (match) {
-            const fields = match[1].split('~');
-            // fields: name, code, current_price, prev_close, open, volume...
-            const name = fields[1] || s.name;
-            const price = parseFloat(fields[3]);
-            const prevClose = parseFloat(fields[4]);
-            if (!isNaN(price) && !isNaN(prevClose) && prevClose > 0) {
-              const change = price - prevClose;
-              const changePct = (change / prevClose) * 100;
-              newPrices[name || s.name] = { code: s.code, price, change, changePct };
+    // Use Sina API via script tag (JSONP bypasses CORS) + no-referrer to avoid blocking
+    var script = document.createElement('script');
+    script.referrerPolicy = 'no-referrer';
+    script.src = 'https://hq.sinajs.cn/list=' + codes;
+
+    var timeout = setTimeout(function() {
+      if (script.parentNode) script.parentNode.removeChild(script);
+      loadCachedPrices();
+    }, 8000);
+
+    var checkCount = 0;
+    var checkInterval = setInterval(function() {
+      checkCount++;
+      var newPrices = {};
+      var hasData = false;
+      trackedStocks.forEach(function(s) {
+        var varName = 'hq_str_' + s.code;
+        if (window[varName]) {
+          hasData = true;
+          var fields = window[varName].split(',');
+          if (fields.length >= 3) {
+            var name = fields[0].replace(/\s/g, '');
+            var price = parseFloat(fields[3]);
+            var prevClose = parseFloat(fields[2]);
+            if (!isNaN(price) && !isNaN(prevClose) && prevClose > 0 && name) {
+              var change = price - prevClose;
+              newPrices[name] = { code: s.code, price: price, change: change, changePct: (change / prevClose) * 100 };
             }
           }
-        });
-        if (Object.keys(newPrices).length > 0) {
-          stockPrices = newPrices;
-          renderTicker();
-          document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
-          try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
+          delete window[varName];
         }
-      })
-      .catch(() => {
-        // Fallback: try cached prices
-        try {
-          const cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
-          if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
-        } catch(e) {}
       });
+      if (hasData && Object.keys(newPrices).length > 0) {
+        stockPrices = newPrices;
+        renderTicker();
+        document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
+        try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
+        clearTimeout(timeout);
+        clearInterval(checkInterval);
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      if (checkCount > 40) { // 4 seconds max
+        clearInterval(checkInterval);
+        if (script.parentNode) script.parentNode.removeChild(script);
+        if (Object.keys(newPrices).length === 0) loadCachedPrices();
+      }
+    }, 100);
+  }
+
+  function loadCachedPrices() {
+    try {
+      var cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
+      if (cached && cached.prices && Object.keys(cached.prices).length > 0) {
+        stockPrices = cached.prices;
+        renderTicker();
+      }
+    } catch(e) {}
   }
 
   function renderTicker() {
