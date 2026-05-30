@@ -132,13 +132,63 @@
   const newsModalContent = document.getElementById('news-modal-content');
 
   function fetchNews() {
+    // Try Sina Finance real news API via JSONP
+    var cbName = '_sn_cb_' + Date.now();
+    window[cbName] = function(resp) {
+      try {
+        if (resp && resp.result && resp.result.data) {
+          var items = resp.result.data.slice(0, 10);
+          newsData = items.map(function(n, i) {
+            var ts = parseInt(n.ctime) * 1000;
+            var d = new Date(ts);
+            var timeStr = d.getFullYear() + '-' +
+              String(d.getMonth()+1).padStart(2,'0') + '-' +
+              String(d.getDate()).padStart(2,'0') + ' ' +
+              String(d.getHours()).padStart(2,'0') + ':' +
+              String(d.getMinutes()).padStart(2,'0');
+            var source = (n.wapurl || '').indexOf('eastmoney') > -1 ? 'eastmoney' :
+                        ((n.wapurl || '').indexOf('cls.cn') > -1 ? 'cls' : 'sina');
+            return {
+              rank: i+1,
+              title: n.title || '',
+              source: source,
+              time: timeStr,
+              url: n.wapurl || n.url || '#',
+              body: n.intro || n.title || ''
+            };
+          });
+          renderNews();
+          try { localStorage.setItem('zhou_news_cache', JSON.stringify({ time: Date.now(), news: newsData })); } catch(e) {}
+        }
+      } catch(e) { loadFallbackNews(); }
+      delete window[cbName];
+    };
+
+    var script = document.createElement('script');
+    script.src = 'https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&k=&num=10&page=1&callback=' + cbName;
+    script.onerror = function() { loadFallbackNews(); delete window[cbName]; };
+    document.head.appendChild(script);
+    setTimeout(function() {
+      if (script.parentNode) { script.parentNode.removeChild(script); delete window[cbName]; loadFallbackNews(); }
+    }, 8000);
+  }
+
+  function loadFallbackNews() {
+    // Use cached news if available
+    try {
+      var cached = JSON.parse(localStorage.getItem('zhou_news_cache'));
+      if (cached && cached.news && cached.news.length > 0) {
+        newsData = cached.news;
+        renderNews();
+        return;
+      }
+    } catch(e) {}
     loadNewsFromBuiltIn();
   }
 
   function loadNewsFromBuiltIn() {
     var today = new Date();
     var dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-
     newsData = [
       {rank:1,title:'A股三大指数震荡分化 芯片半导体板块集体退潮 电力消费走强',source:'eastmoney',time:dateStr+' 15:30',url:'https://finance.eastmoney.com/a/czqyw.html',body:'5月29日，A股三大指数高开低走，上证指数收跌0.37%，深证成指跌1.00%，创业板指跌1.14%。半导体板块遭遇集体回调，国家大基金减持消息引发获利盘涌出。电力、白酒、房地产板块逆势走强，资金高低切换明显。两市成交额达2.97万亿元。'},
       {rank:2,title:'国家大基金高位减持沪硅产业、中芯国际 半导体板块承压',source:'cls',time:dateStr+' 14:15',url:'https://www.cls.cn/depth/xxx',body:'国家集成电路产业投资基金（大基金）宣布减持沪硅产业不超过2%股份、中芯国际不超过1%股份。这是大基金2026年以来的首次减持动作，引发市场对半导体板块估值过热的担忧。受此消息影响，沪硅产业跌超8%，中芯国际跌超6%。'},
