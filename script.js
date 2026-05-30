@@ -132,46 +132,9 @@
   const newsModalContent = document.getElementById('news-modal-content');
 
   function fetchNews() {
-    // Try Sina Finance API, but show fallback quickly if it fails
-    var cbName = '_sn_cb_' + Date.now();
-    var loaded = false;
-
-    window[cbName] = function(resp) {
-      if (loaded) return; loaded = true;
-      try {
-        if (resp && resp.result && resp.result.data) {
-          var items = resp.result.data.slice(0, 10);
-          newsData = items.map(function(n, i) {
-            var ts = parseInt(n.ctime) * 1000;
-            var d = new Date(ts);
-            var timeStr = d.getFullYear() + '-' +
-              String(d.getMonth()+1).padStart(2,'0') + '-' +
-              String(d.getDate()).padStart(2,'0') + ' ' +
-              String(d.getHours()).padStart(2,'0') + ':' +
-              String(d.getMinutes()).padStart(2,'0');
-            var source = n.wapurl && n.wapurl.indexOf('eastmoney') > -1 ? 'eastmoney' :
-                        (n.wapurl && n.wapurl.indexOf('cls.cn') > -1 ? 'cls' : 'sina');
-            return {rank:i+1,title:n.title||'',source:source,time:timeStr,url:n.wapurl||n.url||'#',body:n.intro||n.title||''};
-          });
-          renderNews();
-          try { localStorage.setItem('zhou_news_cache', JSON.stringify({time:Date.now(),news:newsData})); } catch(e) {}
-        }
-      } catch(e) {}
-      delete window[cbName];
-      if (script && script.parentNode) script.parentNode.removeChild(script);
-    };
-
-    var script = document.createElement('script');
-    script.src = 'https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&k=&num=10&page=1&callback=' + cbName;
-    script.onerror = function() { if (!loaded) { loaded = true; loadFallbackNews(); } delete window[cbName]; };
-
-    // Show fallback after 3 seconds if Sina doesn't respond
-    setTimeout(function() {
-      if (!loaded) { loaded = true; loadFallbackNews(); delete window[cbName]; }
-      if (script && script.parentNode) script.parentNode.removeChild(script);
-    }, 3000);
-
-    document.head.appendChild(script);
+    // Sina feed API needs specific headers browsers can't set via script tag
+    // Skip direct API call - use the reliable built-in + cache approach instead
+    loadNewsFromBuiltIn();
   }
 
   function loadFallbackNews() {
@@ -220,7 +183,7 @@
         '<div class="news-meta"><span class="news-source-tag ' + srcClass + '">' + srcLabel + '</span><span>' + n.time + '</span></div></div>' +
         '</div>';
     }).join('');
-    newsTime.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+    if (newsTime) newsTime.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
     try { localStorage.setItem('zhou_news_time', Date.now().toString()); } catch(e) {}
   }
 
@@ -243,11 +206,9 @@
 
   newsModalOverlay.addEventListener('click', function(e) { if (e.target === newsModalOverlay) newsModalOverlay.classList.remove('active'); });
 
-  // Show fallback news immediately, then try Sina API
-  loadFallbackNews();
-  setTimeout(fetchNews, 500);
-  // Refresh every 12 hours
-  setInterval(fetchNews, 43200000);
+  // Load news immediately + refresh every 12 hours
+  loadNewsFromBuiltIn();
+  setInterval(loadNewsFromBuiltIn, 43200000);
 
   // ===== C. SECTOR FILTERS =====
   const allSectors = new Set();
