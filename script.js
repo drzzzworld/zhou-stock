@@ -25,58 +25,59 @@
   const tickerTime = document.getElementById('ticker-time');
   let stockPrices = {};
 
+  // Stock code to EastMoney secid mapping
+  function getSecId(code) {
+    if (code.startsWith('sh')) return '1.' + code.replace('sh', '');
+    return '0.' + code.replace('sz', '');
+  }
+
   function updateTicker() {
     if (!trackedStocks || trackedStocks.length === 0) return;
 
-    var codes = trackedStocks.map(function(s) { return s.code; }).join(',');
+    // Build EastMoney API URL with JSONP callback
+    var secids = trackedStocks.map(function(s) { return getSecId(s.code); }).join(',');
+    var cbName = '_em_cb_' + Date.now();
+    var fields = 'f43,f44,f45,f46,f47,f48,f50,f57,f58,f60,f116,f117,f162,f167,f169,f170,f171';
 
-    // Use Sina API via script tag (JSONP bypasses CORS) + no-referrer to avoid blocking
-    var script = document.createElement('script');
-    script.referrerPolicy = 'no-referrer';
-    script.src = 'https://hq.sinajs.cn/list=' + codes;
-
-    var timeout = setTimeout(function() {
-      if (script.parentNode) script.parentNode.removeChild(script);
-      loadCachedPrices();
-    }, 8000);
-
-    var checkCount = 0;
-    var checkInterval = setInterval(function() {
-      checkCount++;
+    window[cbName] = function(resp) {
+      if (!resp || !resp.data) { loadCachedPrices(); delete window[cbName]; return; }
       var newPrices = {};
-      var hasData = false;
-      trackedStocks.forEach(function(s) {
-        var varName = 'hq_str_' + s.code;
-        if (window[varName]) {
-          hasData = true;
-          var fields = window[varName].split(',');
-          if (fields.length >= 3) {
-            var name = fields[0].replace(/\s/g, '');
-            var price = parseFloat(fields[3]);
-            var prevClose = parseFloat(fields[2]);
-            if (!isNaN(price) && !isNaN(prevClose) && prevClose > 0 && name) {
-              var change = price - prevClose;
-              newPrices[name] = { code: s.code, price: price, change: change, changePct: (change / prevClose) * 100 };
-            }
-          }
-          delete window[varName];
+      // resp.data can be a single object or array
+      var items = Array.isArray(resp.data) ? resp.data : [resp.data];
+      items.forEach(function(item) {
+        if (!item) return;
+        var name = item.f57;
+        var price = (item.f43 || 0) / 100;
+        var prevClose = (item.f58 || 0) / 100;
+        if (name && price > 0 && prevClose > 0) {
+          var changePct = item.f50 || 0; // f50 is already percentage * 100
+          changePct = changePct / 100;
+          newPrices[name] = {
+            code: (item.f116 || ''), // f116 is the secid, not useful here
+            price: price,
+            change: price - prevClose,
+            changePct: changePct
+          };
         }
       });
-      if (hasData && Object.keys(newPrices).length > 0) {
+      if (Object.keys(newPrices).length > 0) {
         stockPrices = newPrices;
         renderTicker();
         document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
         try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
-        clearTimeout(timeout);
-        clearInterval(checkInterval);
-        if (script.parentNode) script.parentNode.removeChild(script);
+      } else {
+        loadCachedPrices();
       }
-      if (checkCount > 40) { // 4 seconds max
-        clearInterval(checkInterval);
-        if (script.parentNode) script.parentNode.removeChild(script);
-        if (Object.keys(newPrices).length === 0) loadCachedPrices();
-      }
-    }, 100);
+      delete window[cbName];
+    };
+
+    var script = document.createElement('script');
+    script.src = 'https://push2.eastmoney.com/api/qt/stock/get?secids=' + secids + '&fields=' + fields + '&cb=' + cbName;
+    script.onerror = function() { loadCachedPrices(); delete window[cbName]; };
+    document.head.appendChild(script);
+    setTimeout(function() {
+      if (script.parentNode) { script.parentNode.removeChild(script); delete window[cbName]; loadCachedPrices(); }
+    }, 10000);
   }
 
   function loadCachedPrices() {
