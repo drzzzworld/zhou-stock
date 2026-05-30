@@ -1,0 +1,94 @@
+name: Fetch Financial News
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Fetch Sina Finance RSS
+        run: |
+          python -c "
+          import requests, json, xml.etree.ElementTree as ET, datetime, hashlib
+
+          news = []
+          # Try Sina Finance RSS
+          try:
+              r = requests.get('https://rss.sina.com.cn/finance/roll.xml', timeout=15, headers={'User-Agent': 'Mozilla/5.0'})
+              r.encoding = 'utf-8'
+              root = ET.fromstring(r.text)
+              items = root.findall('.//item')[:12]
+              for i, item in enumerate(items):
+                  title = item.find('title')
+                  link = item.find('link')
+                  pubdate = item.find('pubDate')
+                  desc = item.find('description')
+                  if title is not None and title.text:
+                      t = title.text.strip()
+                      if t:
+                          dt = ''
+                          if pubdate is not None and pubdate.text:
+                              try:
+                                  dt = datetime.datetime.strptime(pubdate.text[:25], '%a, %d %b %Y %H:%M:%S').strftime('%m-%d %H:%M')
+                              except: dt = pubdate.text[:16]
+                          body = ''
+                          if desc is not None and desc.text:
+                              # Strip HTML tags
+                              import re
+                              body = re.sub(r'<[^>]+>', '', desc.text).strip()[:300]
+                          news.append({
+                              'rank': len(news)+1,
+                              'title': t,
+                              'url': link.text if link is not None else '#',
+                              'time': dt,
+                              'body': body or t,
+                              'source': 'sina'
+                          })
+          except Exception as e:
+              print(f'Sina RSS failed: {e}')
+
+          # Fallback: EastMoney headlines via API
+          if len(news) < 5:
+              try:
+                  r2 = requests.get('https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f3,f12,f14,f136&secids=1.000001,0.399001,0.399006', timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                  # This returns index data, use as market summary
+                  d = r2.json()
+                  if d.get('data') and d['data'].get('diff'):
+                      indices = d['data']['diff']
+                      names = {'000001': '上证指数', '399001': '深证成指', '399006': '创业板指'}
+                      for idx in indices:
+                          name = names.get(idx['f12'], idx['f12'])
+                          chg = idx.get('f3', 0)
+                          arrow = '涨' if chg > 0 else '跌'
+                          news.append({
+                              'rank': len(news)+1,
+                              'title': f'{name}今日{arrow}{abs(chg):.2f}% 报{idx.get(\"f14\",\"\")}点',
+                              'url': f'https://quote.eastmoney.com/zs{idx[\"f12\"]}.html',
+                              'time': datetime.datetime.now().strftime('%m-%d %H:%M'),
+                              'body': f'{name}最新报{idx.get(\"f14\",\"\")}点，{arrow}幅{abs(chg):.2f}%。',
+                              'source': 'eastmoney'
+                          })
+              except Exception as e:
+                  print(f'EastMoney fallback failed: {e}')
+
+          # Write to JSON
+          with open('news-data.json', 'w', encoding='utf-8') as f:
+              json.dump({'updated': datetime.datetime.now().isoformat(), 'news': news[:10]}, f, ensure_ascii=False)
+          print(f'Saved {len(news[:10])} news items')
+          "
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add news-data.json
+          git diff --staged --quiet || git commit -m "auto: update financial news [skip ci]"
+          git push

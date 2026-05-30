@@ -132,9 +132,24 @@
   const newsModalContent = document.getElementById('news-modal-content');
 
   function fetchNews() {
-    // Sina feed API needs specific headers browsers can't set via script tag
-    // Skip direct API call - use the reliable built-in + cache approach instead
-    loadNewsFromBuiltIn();
+    newsList.innerHTML = '<div class="news-loading">⏳ 正在加载最新财经新闻...</div>';
+    // Fetch from same-origin JSON (updated by GitHub Actions every 6h)
+    fetch('news-data.json?t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.news && data.news.length > 0) {
+          newsData = data.news;
+          renderNews();
+          if (newsTime) {
+            var d = new Date(data.updated);
+            newsTime.textContent = '更新于 ' + d.toLocaleString('zh-CN');
+          }
+          try { localStorage.setItem('zhou_news_cache', JSON.stringify({time:Date.now(),news:newsData})); } catch(e) {}
+        } else {
+          loadFallbackNews();
+        }
+      })
+      .catch(function() { loadFallbackNews(); });
   }
 
   function loadFallbackNews() {
@@ -206,9 +221,12 @@
 
   newsModalOverlay.addEventListener('click', function(e) { if (e.target === newsModalOverlay) newsModalOverlay.classList.remove('active'); });
 
-  // Load news immediately + refresh every 12 hours
-  loadNewsFromBuiltIn();
-  setInterval(loadNewsFromBuiltIn, 43200000);
+  // Load news from JSON (updated by GitHub Actions every 6h)
+  // Show loading, then fetch - fallback to built-in if fetch fails
+  newsList.innerHTML = '<div class="news-loading">⏳ 正在加载最新财经新闻...</div>';
+  fetchNews();
+  // Refresh every 2 hours
+  setInterval(fetchNews, 7200000);
 
   // ===== C. SECTOR FILTERS =====
   const allSectors = new Set();
