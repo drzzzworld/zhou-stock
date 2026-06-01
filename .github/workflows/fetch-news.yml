@@ -14,147 +14,90 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests beautifulsoup4 lxml
+      - run: pip install requests
       - name: Fetch Financial News
         run: |
           python << 'PYEOF'
-          import requests, json, datetime, re, sys
-          from bs4 import BeautifulSoup
+          import requests, json, datetime, re
 
           news = []
+          now = datetime.datetime.now()
 
-          def add_news(title, url, body, source, time_str=''):
-              news.append({
-                  'rank': len(news)+1,
-                  'title': str(title)[:120],
-                  'url': str(url)[:500],
-                  'time': time_str or datetime.datetime.now().strftime('%m-%d %H:%M'),
-                  'body': str(body)[:300] if body else str(title)[:300],
-                  'source': source
-              })
+          def add(title, url, body, source, ts=''):
+              news.append({'rank':len(news)+1,'title':str(title)[:120],'url':str(url)[:500],'time':ts or now.strftime('%m-%d %H:%M'),'body':str(body)[:300],'source':source})
 
-          # === Source 1: EastMoney financial news headlines ===
+          # === Source 1: EastMoney news headlines (most reliable) ===
           try:
               r = requests.get(
                   'https://np-listapi.eastmoney.com/comm/web/getNewsByColumnId',
-                  params={'columnId': '100', 'pageNum': '1', 'pageSize': '15'},
-                  headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                           'Referer': 'https://finance.eastmoney.com/'},
-                  timeout=15
+                  params={'columnId':'100','pageNum':'1','pageSize':'15'},
+                  headers={'User-Agent':'Mozilla/5.0','Referer':'https://finance.eastmoney.com/'},
+                  timeout=20
               )
-              if r.status_code == 200:
+              if r.status_code == 200 and r.text:
                   d = r.json()
-                  items = d.get('data', {}).get('list', [])
-                  for item in items[:12]:
-                      add_news(
-                          item.get('title', ''),
-                          item.get('url', f'https://finance.eastmoney.com/a/{item.get("code","")}.html'),
-                          item.get('digest', item.get('title', '')),
-                          'eastmoney',
-                          item.get('showTime', '')
-                      )
-              print(f'EastMoney: {len([n for n in news if n["source"]=="eastmoney"])} items')
+                  items = d.get('data',{}).get('list',[]) or []
+                  for x in items[:12]:
+                      t = (x.get('title') or '').strip()
+                      if t and len(t) > 5:
+                          add(t, x.get('url',''), x.get('digest',''), 'eastmoney', (x.get('showTime') or '')[:16])
           except Exception as e:
-              print(f'EastMoney failed: {e}')
+              print(f'EastMoney: {e}')
 
-          # === Source 2: Sina Finance Roll ===
+          # === Source 2: Sina RSS (raw XML via curl-like approach) ===
           if len(news) < 8:
               try:
-                  r = requests.get(
-                      'https://feed.mix.sina.com.cn/api/roll/get',
-                      params={'pageid': '153', 'lid': '2509', 'k': '', 'num': '15', 'page': '1'},
-                      headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://finance.sina.com.cn/'},
-                      timeout=15
-                  )
-                  r.encoding = 'utf-8'
-                  # Parse JSONP: try{callback(JSON)}catch(e){};
-                  json_match = re.search(r'try\{[^(]+\((.*)\)\}catch', r.text, re.DOTALL)
-                  if json_match:
-                      d = json.loads(json_match.group(1))
-                      items = d.get('result', {}).get('data', [])
-                      for item in items[:12]:
-                          title = item.get('title', '')
-                          if title and title not in [n['title'] for n in news]:
-                              add_news(
-                                  title,
-                                  item.get('wapurl', item.get('url', '')),
-                                  item.get('intro', title),
-                                  'sina',
-                                  item.get('ctime', '')
-                              )
-              except Exception as e:
-                  print(f'Sina API failed: {e}')
-
-          # === Source 3: CLS (财联社) hot news ===
-          if len(news) < 8:
-              try:
-                  r = requests.get(
-                      'https://www.cls.cn/api/sw',
-                      params={'app': 'CailianpressWeb', 'os': 'web', 'sv': '8.4.6'},
-                      headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.cls.cn/'},
-                      timeout=15
-                  )
+                  import xml.etree.ElementTree as ET
+                  r = requests.get('https://rss.sina.com.cn/finance/roll.xml',
+                      headers={'User-Agent':'Mozilla/5.0','Accept':'application/xml,text/xml'}, timeout=20)
                   if r.status_code == 200:
-                      d = r.json()
-                      items = d.get('data', {}).get('roll_data', [])
-                      for item in items[:12]:
-                          title = item.get('title', '')
-                          if title and title not in [n['title'] for n in news]:
-                              item_id = item.get('id', '')
-                              add_news(
-                                  title,
-                                  f'https://www.cls.cn/detail/{item_id}',
-                                  item.get('brief', title),
-                                  'cls',
-                                  item.get('ctime', '')
-                              )
+                      r.encoding = 'utf-8'
+                      root = ET.fromstring(r.text)
+                      for item in root.iter('item'):
+                          t = item.find('title')
+                          l = item.find('link')
+                          d = item.find('description')
+                          if t is not None and t.text and t.text.strip():
+                              body = ''
+                              if d is not None and d.text:
+                                  body = re.sub(r'<[^>]+>','',d.text).strip()[:300]
+                              try:
+                                  pd = item.find('pubDate')
+                                  ts = pd.text[:25] if pd is not None and pd.text else ''
+                                  ts = datetime.datetime.strptime(ts,'%a, %d %b %Y %H:%M:%S').strftime('%m-%d %H:%M') if ts else ''
+                              except: ts = ''
+                              add(t.text.strip(), l.text if l is not None else '#', body, 'sina', ts)
+                          if len([n for n in news if n['source']=='sina']) >= 12:
+                              break
               except Exception as e:
-                  print(f'CLS failed: {e}')
+                  print(f'Sina RSS: {e}')
 
-          # === Source 4: Emergency fallback - generate market summary ===
-          if len(news) < 5:
+          # === Source 3: Market indices (always works) ===
+          if len(news) < 6:
               try:
                   r = requests.get(
                       'https://push2.eastmoney.com/api/qt/ulist.np/get',
-                      params={'fltt': '2', 'fields': 'f2,f3,f4,f12,f14',
-                              'secids': '1.000001,0.399001,0.399006,1.000688,1.000016'},
-                      headers={'User-Agent': 'Mozilla/5.0'},
-                      timeout=10
+                      params={'fltt':'2','fields':'f2,f3,f4,f12,f14','secids':'1.000001,0.399001,0.399006,1.000688,1.000016'},
+                      headers={'User-Agent':'Mozilla/5.0'}, timeout=10
                   )
                   d = r.json()
-                  indices = {
-                      '000001': ('上证指数', 'sh000001'),
-                      '399001': ('深证成指', 'sz399001'),
-                      '399006': ('创业板指', 'sz399006'),
-                      '000688': ('科创50', 'sh000688'),
-                      '000016': ('上证50', 'sh000016'),
-                  }
-                  for idx in d.get('data', {}).get('diff', []):
+                  idx_map = {'000001':('上证指数','sh000001'),'399001':('深证成指','sz399001'),'399006':('创业板指','sz399006'),'000688':('科创50','sh000688'),'000016':('上证50','sh000016')}
+                  for idx in d.get('data',{}).get('diff',[]):
                       code = idx['f12']
-                      name = indices.get(code, (code, code))[0]
-                      chg = idx.get('f3', 0)
-                      arrow = '上涨' if chg > 0 else '下跌'
-                      val = idx.get('f2', '')
-                      add_news(
-                          f'A股收盘：{name}{arrow}{abs(chg):.2f}% 报{val}点',
-                          f'https://quote.eastmoney.com/zs{code}.html',
-                          f'今日{name}收盘报{val}点，{arrow}{abs(chg):.2f}%。',
-                          'eastmoney',
-                          datetime.datetime.now().strftime('%m-%d %H:%M')
-                      )
+                      nm = idx_map.get(code,(code,code))[0]
+                      pct = idx.get('f3',0)
+                      a = '涨' if pct > 0 else '跌'
+                      v = idx.get('f2','')
+                      add(f'收盘：{nm}{a}{abs(pct):.2f}% 报{v}点', f'https://quote.eastmoney.com/zs{code}.html', f'{nm}收盘报{v}点，{a}{abs(pct):.2f}%。', 'eastmoney')
               except Exception as e:
-                  print(f'Fallback failed: {e}')
+                  print(f'Index: {e}')
 
-          # Keep top 10
           news = news[:10]
-
-          # Write
-          with open('news-data.json', 'w', encoding='utf-8') as f:
-              json.dump({
-                  'updated': datetime.datetime.now().isoformat(),
-                  'news': news
-              }, f, ensure_ascii=False)
-          print(f'Saved {len(news)} news items')
+          with open('news-data.json','w',encoding='utf-8') as f:
+              json.dump({'updated':now.isoformat(),'news':news}, f, ensure_ascii=False)
+          print(f'Done: {len(news)} items')
+          for n in news[:3]:
+              print(f'  [{n[\"source\"]}] {n[\"title\"][:80]}')
           PYEOF
       - name: Commit and push
         run: |
