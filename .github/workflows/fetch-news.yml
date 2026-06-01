@@ -133,7 +133,9 @@ jobs:
               json.dump({'updated':now.isoformat(),'news':news}, f, ensure_ascii=False)
           print(f'Done: {len(news)} items')
           for n in news:
-              print(f'  [{n[\"source\"]}] {n[\"title\"][:80]}')
+              src = n['source']
+              ttl = n['title'][:80]
+              print(f'  [{src}] {ttl}')
           PYEOF
       - name: Commit and push
         run: |
