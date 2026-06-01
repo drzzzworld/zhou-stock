@@ -100,9 +100,10 @@ jobs:
                       for item in items[:12]:
                           title = item.get('title', '')
                           if title and title not in [n['title'] for n in news]:
+                              item_id = item.get('id', '')
                               add_news(
                                   title,
-                                  f'https://www.cls.cn/detail/{item.get(\"id\",\"\")}',
+                                  f'https://www.cls.cn/detail/{item_id}',
                                   item.get('brief', title),
                                   'cls',
                                   item.get('ctime', '')
