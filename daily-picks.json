@@ -1,0 +1,17 @@
+{
+  "updated": "2026-06-01T21:24:17.881532",
+  "date": "2026-06-01",
+  "market_status": "已收盘",
+  "picks": [
+    {
+      "rank": 1,
+      "name": "暂无",
+      "code": "—",
+      "price": 0,
+      "changePct": 0,
+      "sector": "等待今日选股结果",
+      "signal": "每日收盘后自动更新",
+      "score": 0
+    }
+  ]
+}

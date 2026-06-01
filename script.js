@@ -428,7 +428,52 @@
   renderTicker = function() { origRenderTicker(); syncPricesToCards(); };
   setInterval(syncPricesToCards, 300000);
 
-  console.log('🚀 舟-自用股票网 v2.0 loaded');
+  // ===== DAILY PICKS =====
+  function loadDailyPicks() {
+    var container = document.getElementById('daily-picks-content');
+    if (!container) return;
+    container.innerHTML = '<div class=\"news-loading\">⏳ 正在加载今日选股...</div>';
+
+    fetch('daily-picks.json?t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.picks || data.picks.length === 0 || data.picks[0].name === '暂无') {
+          container.innerHTML = '<div class=\"no-picks\">📡 今日选股结果尚未生成<br><span style=\"font-size:12px;color:var(--text-dim)\">每个交易日收盘后自动更新</span></div>';
+          if (document.getElementById('daily-date-tag')) {
+            document.getElementById('daily-date-tag').textContent = data && data.date ? data.date : '--';
+          }
+          return;
+        }
+        document.getElementById('daily-date-tag').textContent = data.date || '--';
+        var du = document.getElementById('daily-update-time');
+        if (du && data.updated) {
+          du.textContent = '更新于 ' + new Date(data.updated).toLocaleString('zh-CN');
+        }
+        container.innerHTML = data.picks.map(function(p) {
+          var rc = p.rank === 1 ? 'r1' : p.rank === 2 ? 'r2' : p.rank === 3 ? 'r3' : '';
+          var clr = p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+          var arrow = p.changePct >= 0 ? '↑' : '↓';
+          return '<div class=\"daily-pick-card\">' +
+            '<span class=\"daily-pick-rank ' + rc + '\">' + (p.rank < 10 ? '0' : '') + p.rank + '</span>' +
+            '<div class=\"daily-pick-info\">' +
+              '<div class=\"daily-pick-name\">' + (p.name || p.code) + '</div>' +
+              '<div class=\"daily-pick-code\">' + p.code + '</div>' +
+              '<div class=\"daily-pick-signal\">' + (p.signal || p.sector || '') + '</div>' +
+            '</div>' +
+            '<div class=\"daily-pick-metrics\">' +
+              '<div class=\"daily-pick-price\">' + (p.price > 0 ? p.price.toFixed(2) : '--') + '</div>' +
+              '<div class=\"daily-pick-change\" style=\"color:' + clr + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</div>' +
+              '<div class=\"daily-pick-score\">评分 ' + (p.score || '--') + '</div>' +
+            '</div></div>';
+        }).join('');
+      })
+      .catch(function() {
+        container.innerHTML = '<div class=\"no-picks\">📡 今日选股结果加载失败</div>';
+      });
+  }
+  loadDailyPicks();
+
+  console.log('🚀 舟-自用股票网 v3.0 loaded');
   console.log('   📊 ' + totalPicks + ' picks | ' + totalWeeks + ' weeks | 🏆 ' + winRate + '% win rate');
   console.log('   📰 10 news articles | 💹 ' + (trackedStocks ? trackedStocks.length : 0) + ' stocks tracked');
   console.log('   🔄 Prices refresh every 5 min | News refreshes every 12 hours');

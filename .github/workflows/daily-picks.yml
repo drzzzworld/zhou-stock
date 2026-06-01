@@ -1,0 +1,107 @@
+name: Daily Stock Picks
+on:
+  schedule:
+    - cron: '0 8 * * 1-5'  # Mon-Fri 16:00 CST (after market close)
+  workflow_dispatch:
+
+jobs:
+  daily-picks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install baostock pandas
+      - name: Generate daily picks
+        run: |
+          python -c "
+          import json, datetime, baostock as bs, pandas as pd
+
+          today = datetime.date.today()
+          if today.weekday() >= 5:
+              print('Weekend - market closed')
+              exit(0)
+
+          bs.login()
+          date_str = today.strftime('%Y-%m-%d')
+
+          # Get all A-share stocks
+          rs = bs.query_stock_basic()
+          all_stocks = []
+          while (rs.error_code == '0') & rs.next():
+              code = rs.get_row_data()[0]
+              if code.startswith('sh.6') or code.startswith('sz.0') or code.startswith('sz.3'):
+                  all_stocks.append(code)
+
+          screened = []
+          for code in all_stocks[:500]:  # Sample 500 for speed
+              try:
+                  rs = bs.query_history_k_data_plus(
+                      code, 'date,code,close,volume,amount,pctChg,turn',
+                      start_date=(today - datetime.timedelta(days=30)).strftime('%Y-%m-%d'),
+                      end_date=date_str, frequency='d', adjustflag='2'
+                  )
+                  if rs.error_code != '0': continue
+                  rows = []
+                  while rs.next(): rows.append(rs.get_row_data())
+                  if len(rows) < 20: continue
+
+                  df = pd.DataFrame(rows, columns=['date','code','close','volume','amount','pctChg','turn'])
+                  df['close'] = pd.to_numeric(df['close'])
+                  df['volume'] = pd.to_numeric(df['volume'])
+                  df['pctChg'] = pd.to_numeric(df['pctChg'])
+                  df['turn'] = pd.to_numeric(df['turn'])
+                  df['ma5'] = df['close'].rolling(5).mean()
+                  df['ma20'] = df['close'].rolling(20).mean()
+                  df['vol_ma5'] = df['volume'].rolling(5).mean()
+
+                  last = df.iloc[-1]
+                  if last['close'] > last['ma20'] and last['close'] > last['ma5']:
+                      if last['volume'] > last['vol_ma5'] * 1.5:
+                          if last['turn'] > 2 and last['turn'] < 15:
+                              mom = (df['close'].iloc[-1] - df['close'].iloc[-5]) / df['close'].iloc[-5] * 100
+                              score = abs(last['pctChg']) * 0.4 + last['turn'] * 0.3 + mom * 0.3
+                              screened.append({
+                                  'code': code,
+                                  'name': code,
+                                  'price': round(last['close'], 2),
+                                  'changePct': round(last['pctChg'], 2),
+                                  'turnover': round(last['turn'], 2),
+                                  'score': round(score, 1),
+                                  'sector': '',
+                                  'signal': '均线多头+放量+换手活跃'
+                              })
+              except: continue
+
+          # Sort by score and get top 8
+          screened.sort(key=lambda x: x['score'], reverse=True)
+          top8 = screened[:8]
+
+          # Assign ranks
+          for i, s in enumerate(top8):
+              s['rank'] = i + 1
+
+          bs.logout()
+
+          # Save
+          result = {
+              'updated': datetime.datetime.now().isoformat(),
+              'date': date_str,
+              'market_status': '已收盘',
+              'picks': top8
+          }
+          with open('daily-picks.json', 'w', encoding='utf-8') as f:
+              json.dump(result, f, ensure_ascii=False, indent=2)
+          print(f'Generated {len(top8)} daily picks')
+          "
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add daily-picks.json
+          git diff --staged --quiet || git commit -m "auto: daily stock picks update"
+          git push
