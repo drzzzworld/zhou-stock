@@ -1,8 +1,8 @@
 name: Fetch Financial News
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   fetch-news:
@@ -14,77 +14,147 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests
-      - name: Fetch Sina Finance RSS
+      - run: pip install requests beautifulsoup4 lxml
+      - name: Fetch Financial News
         run: |
-          python -c "
-          import requests, json, xml.etree.ElementTree as ET, datetime, hashlib
+          python << 'PYEOF'
+          import requests, json, datetime, re, sys
+          from bs4 import BeautifulSoup
 
           news = []
-          # Try Sina Finance RSS
-          try:
-              r = requests.get('https://rss.sina.com.cn/finance/roll.xml', timeout=15, headers={'User-Agent': 'Mozilla/5.0'})
-              r.encoding = 'utf-8'
-              root = ET.fromstring(r.text)
-              items = root.findall('.//item')[:12]
-              for i, item in enumerate(items):
-                  title = item.find('title')
-                  link = item.find('link')
-                  pubdate = item.find('pubDate')
-                  desc = item.find('description')
-                  if title is not None and title.text:
-                      t = title.text.strip()
-                      if t:
-                          dt = ''
-                          if pubdate is not None and pubdate.text:
-                              try:
-                                  dt = datetime.datetime.strptime(pubdate.text[:25], '%a, %d %b %Y %H:%M:%S').strftime('%m-%d %H:%M')
-                              except: dt = pubdate.text[:16]
-                          body = ''
-                          if desc is not None and desc.text:
-                              # Strip HTML tags
-                              import re
-                              body = re.sub(r'<[^>]+>', '', desc.text).strip()[:300]
-                          news.append({
-                              'rank': len(news)+1,
-                              'title': t,
-                              'url': link.text if link is not None else '#',
-                              'time': dt,
-                              'body': body or t,
-                              'source': 'sina'
-                          })
-          except Exception as e:
-              print(f'Sina RSS failed: {e}')
 
-          # Fallback: EastMoney headlines via API
+          def add_news(title, url, body, source, time_str=''):
+              news.append({
+                  'rank': len(news)+1,
+                  'title': str(title)[:120],
+                  'url': str(url)[:500],
+                  'time': time_str or datetime.datetime.now().strftime('%m-%d %H:%M'),
+                  'body': str(body)[:300] if body else str(title)[:300],
+                  'source': source
+              })
+
+          # === Source 1: EastMoney financial news headlines ===
+          try:
+              r = requests.get(
+                  'https://np-listapi.eastmoney.com/comm/web/getNewsByColumnId',
+                  params={'columnId': '100', 'pageNum': '1', 'pageSize': '15'},
+                  headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                           'Referer': 'https://finance.eastmoney.com/'},
+                  timeout=15
+              )
+              if r.status_code == 200:
+                  d = r.json()
+                  items = d.get('data', {}).get('list', [])
+                  for item in items[:12]:
+                      add_news(
+                          item.get('title', ''),
+                          item.get('url', f'https://finance.eastmoney.com/a/{item.get("code","")}.html'),
+                          item.get('digest', item.get('title', '')),
+                          'eastmoney',
+                          item.get('showTime', '')
+                      )
+              print(f'EastMoney: {len([n for n in news if n["source"]=="eastmoney"])} items')
+          except Exception as e:
+              print(f'EastMoney failed: {e}')
+
+          # === Source 2: Sina Finance Roll ===
+          if len(news) < 8:
+              try:
+                  r = requests.get(
+                      'https://feed.mix.sina.com.cn/api/roll/get',
+                      params={'pageid': '153', 'lid': '2509', 'k': '', 'num': '15', 'page': '1'},
+                      headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://finance.sina.com.cn/'},
+                      timeout=15
+                  )
+                  r.encoding = 'utf-8'
+                  # Parse JSONP: try{callback(JSON)}catch(e){};
+                  json_match = re.search(r'try\{[^(]+\((.*)\)\}catch', r.text, re.DOTALL)
+                  if json_match:
+                      d = json.loads(json_match.group(1))
+                      items = d.get('result', {}).get('data', [])
+                      for item in items[:12]:
+                          title = item.get('title', '')
+                          if title and title not in [n['title'] for n in news]:
+                              add_news(
+                                  title,
+                                  item.get('wapurl', item.get('url', '')),
+                                  item.get('intro', title),
+                                  'sina',
+                                  item.get('ctime', '')
+                              )
+              except Exception as e:
+                  print(f'Sina API failed: {e}')
+
+          # === Source 3: CLS (财联社) hot news ===
+          if len(news) < 8:
+              try:
+                  r = requests.get(
+                      'https://www.cls.cn/api/sw',
+                      params={'app': 'CailianpressWeb', 'os': 'web', 'sv': '8.4.6'},
+                      headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.cls.cn/'},
+                      timeout=15
+                  )
+                  if r.status_code == 200:
+                      d = r.json()
+                      items = d.get('data', {}).get('roll_data', [])
+                      for item in items[:12]:
+                          title = item.get('title', '')
+                          if title and title not in [n['title'] for n in news]:
+                              add_news(
+                                  title,
+                                  f'https://www.cls.cn/detail/{item.get(\"id\",\"\")}',
+                                  item.get('brief', title),
+                                  'cls',
+                                  item.get('ctime', '')
+                              )
+              except Exception as e:
+                  print(f'CLS failed: {e}')
+
+          # === Source 4: Emergency fallback - generate market summary ===
           if len(news) < 5:
               try:
-                  r2 = requests.get('https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&fields=f3,f12,f14,f136&secids=1.000001,0.399001,0.399006', timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
-                  # This returns index data, use as market summary
-                  d = r2.json()
-                  if d.get('data') and d['data'].get('diff'):
-                      indices = d['data']['diff']
-                      names = {'000001': '上证指数', '399001': '深证成指', '399006': '创业板指'}
-                      for idx in indices:
-                          name = names.get(idx['f12'], idx['f12'])
-                          chg = idx.get('f3', 0)
-                          arrow = '涨' if chg > 0 else '跌'
-                          news.append({
-                              'rank': len(news)+1,
-                              'title': f'{name}今日{arrow}{abs(chg):.2f}% 报{idx.get(\"f14\",\"\")}点',
-                              'url': f'https://quote.eastmoney.com/zs{idx[\"f12\"]}.html',
-                              'time': datetime.datetime.now().strftime('%m-%d %H:%M'),
-                              'body': f'{name}最新报{idx.get(\"f14\",\"\")}点，{arrow}幅{abs(chg):.2f}%。',
-                              'source': 'eastmoney'
-                          })
+                  r = requests.get(
+                      'https://push2.eastmoney.com/api/qt/ulist.np/get',
+                      params={'fltt': '2', 'fields': 'f2,f3,f4,f12,f14',
+                              'secids': '1.000001,0.399001,0.399006,1.000688,1.000016'},
+                      headers={'User-Agent': 'Mozilla/5.0'},
+                      timeout=10
+                  )
+                  d = r.json()
+                  indices = {
+                      '000001': ('上证指数', 'sh000001'),
+                      '399001': ('深证成指', 'sz399001'),
+                      '399006': ('创业板指', 'sz399006'),
+                      '000688': ('科创50', 'sh000688'),
+                      '000016': ('上证50', 'sh000016'),
+                  }
+                  for idx in d.get('data', {}).get('diff', []):
+                      code = idx['f12']
+                      name = indices.get(code, (code, code))[0]
+                      chg = idx.get('f3', 0)
+                      arrow = '上涨' if chg > 0 else '下跌'
+                      val = idx.get('f2', '')
+                      add_news(
+                          f'A股收盘：{name}{arrow}{abs(chg):.2f}% 报{val}点',
+                          f'https://quote.eastmoney.com/zs{code}.html',
+                          f'今日{name}收盘报{val}点，{arrow}{abs(chg):.2f}%。',
+                          'eastmoney',
+                          datetime.datetime.now().strftime('%m-%d %H:%M')
+                      )
               except Exception as e:
-                  print(f'EastMoney fallback failed: {e}')
+                  print(f'Fallback failed: {e}')
 
-          # Write to JSON
+          # Keep top 10
+          news = news[:10]
+
+          # Write
           with open('news-data.json', 'w', encoding='utf-8') as f:
-              json.dump({'updated': datetime.datetime.now().isoformat(), 'news': news[:10]}, f, ensure_ascii=False)
-          print(f'Saved {len(news[:10])} news items')
-          "
+              json.dump({
+                  'updated': datetime.datetime.now().isoformat(),
+                  'news': news
+              }, f, ensure_ascii=False)
+          print(f'Saved {len(news)} news items')
+          PYEOF
       - name: Commit and push
         run: |
           git config user.name "github-actions"
