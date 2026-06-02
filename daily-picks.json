@@ -1,17 +1,95 @@
 {
-  "updated": "2026-06-01T21:24:17.881532",
-  "date": "2026-06-01",
+  "updated": "2026-06-02T12:29:48.635594",
+  "date": "2026-06-02",
   "market_status": "已收盘",
   "picks": [
     {
-      "rank": 1,
-      "name": "暂无",
-      "code": "—",
-      "price": 0,
-      "changePct": 0,
-      "sector": "等待今日选股结果",
-      "signal": "每日收盘后自动更新",
-      "score": 0
+      "code": "sh.600280",
+      "name": "sh.600280",
+      "price": 3.87,
+      "changePct": 9.94,
+      "turnover": 13.44,
+      "score": 16.8,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 1
+    },
+    {
+      "code": "sh.600500",
+      "name": "sh.600500",
+      "price": 6.27,
+      "changePct": 10.0,
+      "turnover": 4.81,
+      "score": 10.3,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 2
+    },
+    {
+      "code": "sh.600255",
+      "name": "sh.600255",
+      "price": 3.99,
+      "changePct": 9.92,
+      "turnover": 11.78,
+      "score": 9.6,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 3
+    },
+    {
+      "code": "sh.600265",
+      "name": "sh.600265",
+      "price": 26.95,
+      "changePct": 4.99,
+      "turnover": 2.98,
+      "score": 9.3,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 4
+    },
+    {
+      "code": "sh.600279",
+      "name": "sh.600279",
+      "price": 5.34,
+      "changePct": 6.37,
+      "turnover": 3.97,
+      "score": 8.3,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 5
+    },
+    {
+      "code": "sh.600362",
+      "name": "sh.600362",
+      "price": 47.48,
+      "changePct": 10.01,
+      "turnover": 4.05,
+      "score": 7.5,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 6
+    },
+    {
+      "code": "sh.600575",
+      "name": "sh.600575",
+      "price": 4.38,
+      "changePct": 5.29,
+      "turnover": 5.66,
+      "score": 6.2,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 7
+    },
+    {
+      "code": "sh.600160",
+      "name": "sh.600160",
+      "price": 38.23,
+      "changePct": 5.26,
+      "turnover": 4.68,
+      "score": 6.1,
+      "sector": "",
+      "signal": "均线多头+放量+换手活跃",
+      "rank": 8
     }
   ]
 }
