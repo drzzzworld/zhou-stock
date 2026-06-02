@@ -34,56 +34,31 @@
   function updateTicker() {
     if (!trackedStocks || trackedStocks.length === 0) return;
 
-    // Use Sina API via script tag (creates hq_str_XXX global vars)
-    var codes = trackedStocks.map(function(s) { return s.code; }).join(',');
-    var script = document.createElement('script');
-    script.src = 'https://hq.sinajs.cn/list=' + codes;
-
-    var done = false;
-    var checkCount = 0;
-    var timer = setInterval(function() {
-      checkCount++;
-      var newPrices = {};
-      var gotAny = false;
-
-      trackedStocks.forEach(function(s) {
-        var vn = 'hq_str_' + s.code;
-        var raw = window[vn];
-        if (raw && typeof raw === 'string') {
-          gotAny = true;
-          var f = raw.split(',');
-          if (f.length >= 4) {
-            var name = f[0].replace(/\s/g, '');
-            var price = parseFloat(f[3]);
-            var prev = parseFloat(f[2]);
-            if (name && !isNaN(price) && !isNaN(prev) && prev > 0 && price > 0) {
-              newPrices[name] = {
-                code: s.code,
-                price: price,
-                change: price - prev,
-                changePct: ((price - prev) / prev) * 100
-              };
-            }
+    // Fetch from same-origin prices.json (updated every 5 min by GitHub Actions)
+    fetch('prices.json?t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.stocks) { loadCachedPrices(); return; }
+        var newPrices = {};
+        trackedStocks.forEach(function(s) {
+          if (data.stocks[s.name]) {
+            var p = data.stocks[s.name];
+            newPrices[s.name] = {
+              code: s.code,
+              price: p.price,
+              change: (p.price - (p.price / (1 + p.changePct/100))),
+              changePct: p.changePct
+            };
           }
-          delete window[vn];
+        });
+        if (Object.keys(newPrices).length > 0) {
+          stockPrices = newPrices;
+          renderTicker();
+          document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
+          try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
         }
-      });
-
-      if (gotAny && Object.keys(newPrices).length > 0) {
-        stockPrices = newPrices;
-        renderTicker();
-        document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
-        try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
-        done = true;
-      }
-
-      if (done || checkCount > 40) {
-        clearInterval(timer);
-        if (script.parentNode) script.parentNode.removeChild(script);
-        if (!done) loadCachedPrices();
-      }
-    }, 100);
-    document.head.appendChild(script);
+      })
+      .catch(function() { loadCachedPrices(); });
   }
 
   function loadCachedPrices() {

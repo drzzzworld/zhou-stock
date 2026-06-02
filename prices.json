@@ -1,0 +1,45 @@
+{
+  "updated": "2026-06-02T20:39:43.764298",
+  "stocks": {
+    "格力电器": {
+      "price": 39.17,
+      "changePct": 0
+    },
+    "药明康德": {
+      "price": 101.6,
+      "changePct": 0
+    },
+    "宁德时代": {
+      "price": 424.0,
+      "changePct": 0
+    },
+    "巨星科技": {
+      "price": 32.4,
+      "changePct": 0
+    },
+    "立昂微": {
+      "price": 55.38,
+      "changePct": 0
+    },
+    "粤电力A": {
+      "price": 8.88,
+      "changePct": 0
+    },
+    "沪电股份": {
+      "price": 128.29,
+      "changePct": 0
+    },
+    "中芯国际": {
+      "price": 139.91,
+      "changePct": 0
+    },
+    "贵州茅台": {
+      "price": 1326.0,
+      "changePct": 0
+    },
+    "西安奕材": {
+      "price": 37.94,
+      "changePct": 0
+    }
+  }
+}

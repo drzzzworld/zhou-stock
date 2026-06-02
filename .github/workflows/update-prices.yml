@@ -1,0 +1,96 @@
+name: Update Stock Prices
+on:
+  schedule:
+    - cron: '*/5 1-7 * * 1-5'  # Every 5 min during market hours (9:00-15:00 CST = 1:00-7:00 UTC)
+  workflow_dispatch:
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Fetch stock prices
+        run: |
+          python << 'PYEOF'
+          import requests, json, datetime, re
+
+          now = datetime.datetime.now()
+          # Skip weekends
+          if now.weekday() >= 5:
+              print('Weekend - skipping')
+              exit(0)
+
+          # Stock codes for Sina API
+          codes = ['sh605358','sz000651','sh603259','sz002444','sh688783',
+                   'sz000539','sh603527','sz300750','sh688981','sh600519']
+          names_map = {
+              'sh605358':'立昂微','sz000651':'格力电器','sh603259':'药明康德',
+              'sz002444':'巨星科技','sh688783':'西安奕材','sz000539':'粤电力A',
+              'sh603527':'众源新材','sz300750':'宁德时代','sh688981':'中芯国际',
+              'sh600519':'贵州茅台'
+          }
+
+          stocks = {}
+          try:
+              r = requests.get(
+                  'https://hq.sinajs.cn/list=' + ','.join(codes),
+                  headers={'User-Agent':'Mozilla/5.0','Referer':'https://finance.sina.com.cn/'},
+                  timeout=10
+              )
+              r.encoding = 'gbk'
+              for code in codes:
+                  vn = 'hq_str_' + code
+                  if vn in r.text:
+                      m = re.search(r'hq_str_'+code+r'="(.+?)"', r.text)
+                      if m:
+                          f = m.group(1).split(',')
+                          if len(f) >= 4:
+                              name = f[0].replace(' ','')
+                              price = float(f[3])
+                              prev = float(f[2])
+                              if name and price > 0 and prev > 0:
+                                  chg = round((price - prev) / prev * 100, 2)
+                                  stocks[name] = {'price':price,'changePct':chg}
+          except Exception as e:
+              print(f'Sina failed: {e}')
+              # Fallback: use EastMoney
+              try:
+                  secids = ['1.605358','0.000651','1.603259','0.002444','1.688783',
+                            '0.000539','1.603527','0.300750','1.688981','1.600519']
+                  r2 = requests.get(
+                      'https://push2.eastmoney.com/api/qt/ulist.np/get',
+                      params={'fltt':'2','fields':'f2,f3,f12,f14','secids':','.join(secids)},
+                      headers={'User-Agent':'Mozilla/5.0'}, timeout=10
+                  )
+                  d = r2.json()
+                  for item in d.get('data',{}).get('diff',[]):
+                      nm = item.get('f14','')
+                      pr = float(item.get('f2',0))
+                      chg = float(item.get('f3',0))
+                      if nm and pr > 0:
+                          stocks[nm] = {'price':pr,'changePct':chg}
+              except Exception as e2:
+                  print(f'Fallback also failed: {e2}')
+
+          if stocks:
+              result = {'updated':now.isoformat(),'stocks':stocks}
+              with open('prices.json','w',encoding='utf-8') as f:
+                  json.dump(result, f, ensure_ascii=False)
+              print(f'Updated {len(stocks)} stock prices')
+              for n,d in stocks.items():
+                  a = 'up' if d['changePct']>=0 else 'down'
+                  print(f'  {n}: {d[\"price\"]} ({d[\"changePct\"]:+.2f}%)')
+          PYEOF
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add prices.json
+          git diff --staged --quiet || git commit -m "auto: stock prices update [skip ci]"
+          git push
