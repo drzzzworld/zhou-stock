@@ -34,50 +34,56 @@
   function updateTicker() {
     if (!trackedStocks || trackedStocks.length === 0) return;
 
-    // Build EastMoney API URL with JSONP callback
-    var secids = trackedStocks.map(function(s) { return getSecId(s.code); }).join(',');
-    var cbName = '_em_cb_' + Date.now();
-    var fields = 'f43,f44,f45,f46,f47,f48,f50,f57,f58,f60,f116,f117,f162,f167,f169,f170,f171';
+    // Use Sina API via script tag (creates hq_str_XXX global vars)
+    var codes = trackedStocks.map(function(s) { return s.code; }).join(',');
+    var script = document.createElement('script');
+    script.src = 'https://hq.sinajs.cn/list=' + codes;
 
-    window[cbName] = function(resp) {
-      if (!resp || !resp.data) { loadCachedPrices(); delete window[cbName]; return; }
+    var done = false;
+    var checkCount = 0;
+    var timer = setInterval(function() {
+      checkCount++;
       var newPrices = {};
-      // resp.data can be a single object or array
-      var items = Array.isArray(resp.data) ? resp.data : [resp.data];
-      items.forEach(function(item) {
-        if (!item) return;
-        var name = item.f57;
-        var price = (item.f43 || 0) / 100;
-        var prevClose = (item.f58 || 0) / 100;
-        if (name && price > 0 && prevClose > 0) {
-          var changePct = item.f50 || 0; // f50 is already percentage * 100
-          changePct = changePct / 100;
-          newPrices[name] = {
-            code: (item.f116 || ''), // f116 is the secid, not useful here
-            price: price,
-            change: price - prevClose,
-            changePct: changePct
-          };
+      var gotAny = false;
+
+      trackedStocks.forEach(function(s) {
+        var vn = 'hq_str_' + s.code;
+        var raw = window[vn];
+        if (raw && typeof raw === 'string') {
+          gotAny = true;
+          var f = raw.split(',');
+          if (f.length >= 4) {
+            var name = f[0].replace(/\s/g, '');
+            var price = parseFloat(f[3]);
+            var prev = parseFloat(f[2]);
+            if (name && !isNaN(price) && !isNaN(prev) && prev > 0 && price > 0) {
+              newPrices[name] = {
+                code: s.code,
+                price: price,
+                change: price - prev,
+                changePct: ((price - prev) / prev) * 100
+              };
+            }
+          }
+          delete window[vn];
         }
       });
-      if (Object.keys(newPrices).length > 0) {
+
+      if (gotAny && Object.keys(newPrices).length > 0) {
         stockPrices = newPrices;
         renderTicker();
         document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
         try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
-      } else {
-        loadCachedPrices();
+        done = true;
       }
-      delete window[cbName];
-    };
 
-    var script = document.createElement('script');
-    script.src = 'https://push2.eastmoney.com/api/qt/stock/get?secids=' + secids + '&fields=' + fields + '&cb=' + cbName;
-    script.onerror = function() { loadCachedPrices(); delete window[cbName]; };
+      if (done || checkCount > 40) {
+        clearInterval(timer);
+        if (script.parentNode) script.parentNode.removeChild(script);
+        if (!done) loadCachedPrices();
+      }
+    }, 100);
     document.head.appendChild(script);
-    setTimeout(function() {
-      if (script.parentNode) { script.parentNode.removeChild(script); delete window[cbName]; loadCachedPrices(); }
-    }, 10000);
   }
 
   function loadCachedPrices() {
