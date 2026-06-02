@@ -1,7 +1,7 @@
 name: Daily Stock Picks
 on:
   schedule:
-    - cron: '0 8 * * 1-5'  # Mon-Fri 16:00 CST (after market close)
+    - cron: '0 8 * * 1-5'  # 16:00 CST
   workflow_dispatch:
 
 jobs:
@@ -14,94 +14,134 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install dependencies
-        run: pip install baostock pandas
+      - run: pip install requests
       - name: Generate daily picks
         run: |
-          python -c "
-          import json, datetime, baostock as bs, pandas as pd
+          python << 'PYEOF'
+          import requests, json, datetime, math
 
           today = datetime.date.today()
+          now = datetime.datetime.now()
           if today.weekday() >= 5:
               print('Weekend - market closed')
               exit(0)
 
-          bs.login()
-          date_str = today.strftime('%Y-%m-%d')
+          # Get all A-shares with real-time data from EastMoney
+          # Using the market overview API to find top-performing stocks
+          all_picks = []
 
-          # Get all A-share stocks
-          rs = bs.query_stock_basic()
-          all_stocks = []
-          while (rs.error_code == '0') & rs.next():
-              code = rs.get_row_data()[0]
-              if code.startswith('sh.6') or code.startswith('sz.0') or code.startswith('sz.3'):
-                  all_stocks.append(code)
-
-          screened = []
-          for code in all_stocks[:500]:  # Sample 500 for speed
+          # Strategy 1: Top gainers with high turnover
+          for page in range(1, 4):
               try:
-                  rs = bs.query_history_k_data_plus(
-                      code, 'date,code,close,volume,amount,pctChg,turn',
-                      start_date=(today - datetime.timedelta(days=30)).strftime('%Y-%m-%d'),
-                      end_date=date_str, frequency='d', adjustflag='2'
+                  r = requests.get(
+                      'https://push2.eastmoney.com/api/qt/clist/get',
+                      params={
+                          'pn': str(page), 'pz': '100', 'po': '1', 'np': '1',
+                          'fltt': '2', 'invt': '2',
+                          'fid': 'f3',  # sort by change%
+                          'fs': 'm:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23',
+                          'fields': 'f2,f3,f4,f5,f6,f7,f12,f14,f15,f16,f17,f20'
+                      },
+                      headers={'User-Agent': 'Mozilla/5.0'}, timeout=15
                   )
-                  if rs.error_code != '0': continue
-                  rows = []
-                  while rs.next(): rows.append(rs.get_row_data())
-                  if len(rows) < 20: continue
+                  data = r.json()
+                  items = data.get('data', {}).get('diff', [])
+                  for s in items:
+                      code = s.get('f12', '')
+                      name = s.get('f14', '')
+                      price = s.get('f2', 0) or 0
+                      chg_pct = s.get('f3', 0) or 0
+                      turnover = s.get('f8', 0) or 0
+                      volume = s.get('f5', 0) or 0
+                      amount = s.get('f6', 0) or 0
+                      high = s.get('f15', 0) or 0
+                      low = s.get('f16', 0) or 0
+                      open_p = s.get('f17', 0) or 0
+                      mcap = s.get('f20', 0) or 0
 
-                  df = pd.DataFrame(rows, columns=['date','code','close','volume','amount','pctChg','turn'])
-                  df['close'] = pd.to_numeric(df['close'])
-                  df['volume'] = pd.to_numeric(df['volume'])
-                  df['pctChg'] = pd.to_numeric(df['pctChg'])
-                  df['turn'] = pd.to_numeric(df['turn'])
-                  df['ma5'] = df['close'].rolling(5).mean()
-                  df['ma20'] = df['close'].rolling(20).mean()
-                  df['vol_ma5'] = df['volume'].rolling(5).mean()
+                      if not name or price <= 0 or price > 1000:
+                          continue
+                      if chg_pct < -8 or chg_pct > 20:
+                          continue
+                      if amount < 1e8:  # 1亿成交额
+                          continue
 
-                  last = df.iloc[-1]
-                  if last['close'] > last['ma20'] and last['close'] > last['ma5']:
-                      if last['volume'] > last['vol_ma5'] * 1.5:
-                          if last['turn'] > 2 and last['turn'] < 15:
-                              mom = (df['close'].iloc[-1] - df['close'].iloc[-5]) / df['close'].iloc[-5] * 100
-                              score = abs(last['pctChg']) * 0.4 + last['turn'] * 0.3 + mom * 0.3
-                              screened.append({
-                                  'code': code,
-                                  'name': code,
-                                  'price': round(last['close'], 2),
-                                  'changePct': round(last['pctChg'], 2),
-                                  'turnover': round(last['turn'], 2),
-                                  'score': round(score, 1),
-                                  'sector': '',
-                                  'signal': '均线多头+放量+换手活跃'
-                              })
-              except: continue
+                      # Score: momentum + liquidity + breakout
+                      score = abs(chg_pct) * 2 + math.log10(max(amount, 1e7)) * 3
 
-          # Sort by score and get top 8
-          screened.sort(key=lambda x: x['score'], reverse=True)
-          top8 = screened[:8]
+                      # Check if near daily high (breakout signal)
+                      if high > 0 and price > 0:
+                          high_pct = price / high
+                          if high_pct > 0.9:
+                              score += 5  # near high = bullish
+                          if price > open_p:
+                              score += 3  # positive day
 
-          # Assign ranks
-          for i, s in enumerate(top8):
+                      all_picks.append({
+                          'code': code,
+                          'name': name,
+                          'price': round(price, 2),
+                          'changePct': round(chg_pct, 2),
+                          'amount': round(amount / 1e8, 1),
+                          'turnover': round(turnover, 1) if turnover else 0,
+                          'mcap': round(mcap / 1e8, 1) if mcap else 0,
+                          'score': round(score, 1),
+                          'sector': '',
+                          'signal': ''
+                      })
+              except Exception as e:
+                  print(f'Page {page} error: {e}')
+
+          # Remove duplicates
+          seen = set()
+          unique = []
+          for p in all_picks:
+              if p['code'] not in seen:
+                  seen.add(p['code'])
+                  unique.append(p)
+          all_picks = unique
+
+          # Sort by score and assign signals
+          all_picks.sort(key=lambda x: x['score'], reverse=True)
+
+          # Select top 8 diverse picks
+          selected = []
+          for p in all_picks:
+              if len(selected) >= 8:
+                  break
+              # Assign signal descriptions
+              if p['changePct'] > 5:
+                  p['signal'] = '强势突破'
+              elif p['changePct'] > 2:
+                  p['signal'] = '温和上涨'
+              elif p['changePct'] >= 0:
+                  p['signal'] = '稳健走势'
+              else:
+                  p['signal'] = '回调观察'
+
+              if p['price'] > p.get('high', 0) * 0.95:
+                  p['signal'] += '+盘中冲高'
+              selected.append(p)
+
+          for i, s in enumerate(selected):
               s['rank'] = i + 1
 
-          bs.logout()
-
-          # Save
           result = {
-              'updated': datetime.datetime.now().isoformat(),
-              'date': date_str,
+              'updated': now.isoformat(),
+              'date': today.strftime('%Y-%m-%d'),
               'market_status': '已收盘',
-              'picks': top8
+              'picks': selected
           }
           with open('daily-picks.json', 'w', encoding='utf-8') as f:
               json.dump(result, f, ensure_ascii=False, indent=2)
-          print(f'Generated {len(top8)} daily picks')
-          "
+          print(f'Generated {len(selected)} daily picks from {len(all_picks)} candidates')
+          for s in selected:
+              print(f'  #{s[\"rank\"]} {s[\"name\"]}({s[\"code\"]}) {s[\"price\"]} {s[\"changePct\"]:+.2f}% score={s[\"score\"]} {s[\"signal\"]}')
+          PYEOF
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add daily-picks.json
-          git diff --staged --quiet || git commit -m "auto: daily stock picks update"
+          git diff --staged --quiet || git commit -m "auto: daily stock picks [skip ci]"
           git push
