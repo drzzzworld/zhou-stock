@@ -134,9 +134,18 @@ jobs:
           }
           with open('daily-picks.json', 'w', encoding='utf-8') as f:
               json.dump(result, f, ensure_ascii=False, indent=2)
-          print(f'Generated {len(selected)} daily picks from {len(all_picks)} candidates')
+          cnt = len(selected)
+          total = len(all_picks)
+          print(f'Generated {cnt} daily picks from {total} candidates')
           for s in selected:
-              print(f'  #{s[\"rank\"]} {s[\"name\"]}({s[\"code\"]}) {s[\"price\"]} {s[\"changePct\"]:+.2f}% score={s[\"score\"]} {s[\"signal\"]}')
+              r = s['rank']
+              nm = s['name']
+              cd = s['code']
+              pr = s['price']
+              cp = s['changePct']
+              sc = s['score']
+              sg = s['signal']
+              print(f'  #{r} {nm}({cd}) {pr} {cp:+.2f}% score={sc} {sg}')
           PYEOF
       - name: Commit and push
         run: |
