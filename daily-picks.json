@@ -1,6 +1,111 @@
 {
-  "updated": "2026-06-10T18:16:06.292921",
-  "date": "2026-06-10",
+  "updated": "2026-06-11T18:38:02.718995",
+  "date": "2026-06-11",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "300666",
+      "name": "江丰电子",
+      "price": 292.4,
+      "changePct": 20.0,
+      "amount": 60.3,
+      "turnover": 0,
+      "mcap": 775.8,
+      "score": 77.3,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "688146",
+      "name": "中船特气",
+      "price": 349.8,
+      "changePct": 19.79,
+      "amount": 67.2,
+      "turnover": 0,
+      "mcap": 1851.9,
+      "score": 77.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "688549",
+      "name": "中巨芯-U",
+      "price": 30.05,
+      "changePct": 19.96,
+      "amount": 50.4,
+      "turnover": 0,
+      "mcap": 443.9,
+      "score": 77.0,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "688268",
+      "name": "华特气体",
+      "price": 228.82,
+      "changePct": 20.0,
+      "amount": 36.4,
+      "turnover": 0,
+      "mcap": 292.3,
+      "score": 76.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "300263",
+      "name": "隆华科技",
+      "price": 14.18,
+      "changePct": 19.97,
+      "amount": 26.5,
+      "turnover": 0,
+      "mcap": 146.8,
+      "score": 76.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "300706",
+      "name": "阿石创",
+      "price": 67.88,
+      "changePct": 19.99,
+      "amount": 21.7,
+      "turnover": 0,
+      "mcap": 104.2,
+      "score": 76.0,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688545",
+      "name": "兴福电子",
+      "price": 104.52,
+      "changePct": 20.0,
+      "amount": 19.6,
+      "turnover": 0,
+      "mcap": 376.3,
+      "score": 75.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "688167",
+      "name": "炬光科技",
+      "price": 338.86,
+      "changePct": 20.0,
+      "amount": 18.2,
+      "turnover": 0,
+      "mcap": 441.0,
+      "score": 75.8,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
