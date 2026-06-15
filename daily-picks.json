@@ -1,6 +1,111 @@
 {
-  "updated": "2026-06-12T17:41:42.277428",
-  "date": "2026-06-12",
+  "updated": "2026-06-15T20:34:35.415095",
+  "date": "2026-06-15",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "300620",
+      "name": "光库科技",
+      "price": 343.05,
+      "changePct": 20.0,
+      "amount": 81.6,
+      "turnover": 0,
+      "mcap": 854.8,
+      "score": 77.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "300548",
+      "name": "长芯博创",
+      "price": 268.84,
+      "changePct": 20.0,
+      "amount": 67.1,
+      "turnover": 0,
+      "mcap": 792.1,
+      "score": 77.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "301217",
+      "name": "铜冠铜箔",
+      "price": 170.16,
+      "changePct": 20.0,
+      "amount": 66.8,
+      "turnover": 0,
+      "mcap": 1410.7,
+      "score": 77.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "300570",
+      "name": "太辰光",
+      "price": 222.1,
+      "changePct": 20.0,
+      "amount": 64.4,
+      "turnover": 0,
+      "mcap": 504.4,
+      "score": 77.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "688167",
+      "name": "炬光科技",
+      "price": 398.26,
+      "changePct": 20.0,
+      "amount": 42.4,
+      "turnover": 0,
+      "mcap": 518.3,
+      "score": 76.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "688257",
+      "name": "新锐股份",
+      "price": 96.42,
+      "changePct": 19.99,
+      "amount": 26.4,
+      "turnover": 0,
+      "mcap": 341.7,
+      "score": 76.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "300489",
+      "name": "光智科技",
+      "price": 195.43,
+      "changePct": 20.0,
+      "amount": 19.7,
+      "turnover": 0,
+      "mcap": 272.0,
+      "score": 75.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "300726",
+      "name": "宏达电子",
+      "price": 72.41,
+      "changePct": 20.0,
+      "amount": 18.0,
+      "turnover": 0,
+      "mcap": 298.2,
+      "score": 75.8,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
