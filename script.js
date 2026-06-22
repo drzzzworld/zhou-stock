@@ -294,12 +294,14 @@
     '<div class="chart-container"><div class="chart-title">📊 历史推荐表现分布</div><div class="chart-bars" id="chart-bars"></div></div>';
 
   const chartBars = document.getElementById('chart-bars');
+  const maxAbsPerf = Math.max(...allHistPicks.map(p => Math.abs(parsePerf(p.perf))), 1);
   allHistPicks.forEach(p => {
     const perfNum = parsePerf(p.perf);
     const group = document.createElement('div'); group.className = 'chart-bar-group';
     const bar = document.createElement('div');
     bar.className = 'chart-bar ' + (perfNum >= 0 ? 'up' : 'down');
-    bar.style.height = Math.max(4, Math.abs(perfNum) * 6) + 'px';
+    const barH = Math.max(3, (Math.abs(perfNum) / maxAbsPerf) * 110);
+    bar.style.height = barH + 'px';
     bar.title = p.name + ': ' + p.perf;
     const name = document.createElement('span'); name.className = 'chart-bar-label'; name.textContent = p.name.length > 4 ? p.name.slice(0,4)+'..' : p.name;
     const value = document.createElement('span'); value.className = 'chart-bar-value'; value.textContent = p.perf; value.style.color = perfNum >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
