@@ -369,9 +369,9 @@ body::before{
 .stat-value{font-size:26px;font-weight:700;letter-spacing:-0.3px;font-family:var(--font-mono)}
 .stat-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.3px}
 .stat-sub{font-size:10px;color:var(--text-dim);margin-top:3px}
-.chart-container{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg)}
+.chart-container{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:var(--space-lg);margin-bottom:var(--space-xl);overflow:hidden}
 .chart-title{font-size:14px;font-weight:600;margin-bottom:var(--space-lg);color:var(--text-secondary)}
-.chart-bars{display:flex;align-items:flex-end;gap:8px;height:140px;padding:0 2px;flex-wrap:wrap}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;min-height:100px;padding:0 2px;flex-wrap:wrap;overflow-x:auto}
 .chart-bar-group{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:40px}
 .chart-bar{width:100%;max-width:48px;border-radius:4px 4px 0 0;min-height:3px;transition:height 0.6s var(--ease-out)}
 .chart-bar.up{background:var(--green)}
@@ -497,6 +497,6 @@ body::before{
   .nav-links a{display:none}.nav-links .btn-print{display:inline-block}
   .section-header{flex-direction:column;align-items:flex-start}
   .modal-container{padding:var(--space-lg);margin:6px;max-width:100%}.modal-grid{grid-template-columns:1fr}
-  .chart-bars{height:90px}.news-rank{font-size:14px;min-width:20px}.news-card{padding:8px var(--space-md)}.news-title{font-size:12px}
+  .chart-bars{min-height:60px}.news-rank{font-size:14px;min-width:20px}.news-card{padding:8px var(--space-md)}.news-title{font-size:12px}
   .daily-picks-container{grid-template-columns:1fr}
 }
