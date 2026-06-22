@@ -313,9 +313,9 @@
     const avgStr = (avgPf >= 0 ? '+' : '') + avgPf.toFixed(1) + '%';
     const avgClass = avgPf >= 0 ? 'pos' : 'neg';
     return '<tr><td class="hist-week">' + h.weekLabel + '</td><td class="hist-top">' + h.topPick + '</td>' +
-      '<td class="hist-picks-td">' + h.picks.map(p =>
+      '<td class="hist-picks-td"><div class="picks-wrap">' + h.picks.map(p =>
         '<span class="hist-tag"><span class="n">' + p.name + '</span><span style="color:var(--text-muted);font-size:11px">' + p.code + '</span><span style="color:' + (parsePerf(p.perf)>=0?'var(--accent-green)':'var(--accent-red)') + ';font-weight:600;font-size:12px">' + p.perf + '</span></span>'
-      ).join('') + '</td>' +
+      ).join('') + '</div></td>' +
       '<td class="hist-avg ' + avgClass + '">' + avgStr + '</td></tr>';
   }).join('');
 

@@ -389,7 +389,7 @@ body::before{
 .history-table tbody tr:hover{background:var(--bg-card-hover)}
 .hist-week{color:var(--accent);font-weight:600;white-space:nowrap;font-family:var(--font-sans)}
 .hist-top{font-weight:600;font-family:var(--font-sans)}
-.hist-picks-td{display:flex;gap:5px;flex-wrap:wrap}
+.hist-picks-td{gap:5px}.hist-picks-td .picks-wrap{display:flex;gap:5px;flex-wrap:wrap}
 .hist-tag{
   font-size:10px;background:var(--bg-secondary);border:1px solid var(--border-subtle);
   padding:3px 8px;border-radius:var(--radius-xs);color:var(--text-secondary);
