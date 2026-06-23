@@ -1,6 +1,111 @@
 {
-  "updated": "2026-06-22T19:58:17.314816",
-  "date": "2026-06-22",
+  "updated": "2026-06-23T20:20:41.367694",
+  "date": "2026-06-23",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "rank": 1,
+      "code": "600770",
+      "name": "综艺股份",
+      "price": 6.03,
+      "changePct": 2.38,
+      "amount": 1.1,
+      "turnover": 3.2,
+      "mcap": 35,
+      "score": 26.5,
+      "sector": "国产芯片",
+      "signal": "温和放量+低位启动"
+    },
+    {
+      "rank": 2,
+      "code": "002584",
+      "name": "西陇科学",
+      "price": 10.02,
+      "changePct": 9.99,
+      "amount": 6.0,
+      "turnover": 14.8,
+      "mcap": 52,
+      "score": 25.0,
+      "sector": "半导体材料",
+      "signal": "涨停封板+追高需谨慎"
+    },
+    {
+      "rank": 3,
+      "code": "603259",
+      "name": "药明康德",
+      "price": 108.22,
+      "changePct": 1.3,
+      "amount": 35.2,
+      "turnover": 3.5,
+      "mcap": 2200,
+      "score": 22.8,
+      "sector": "医药CXO",
+      "signal": "温和上涨+底部修复"
+    },
+    {
+      "rank": 4,
+      "code": "002444",
+      "name": "巨星科技",
+      "price": 29.69,
+      "changePct": 0.88,
+      "amount": 2.2,
+      "turnover": 1.8,
+      "mcap": 210,
+      "score": 21.5,
+      "sector": "出海制造",
+      "signal": "稳健走势+低估值"
+    },
+    {
+      "rank": 5,
+      "code": "000651",
+      "name": "格力电器",
+      "price": 37.07,
+      "changePct": 0.22,
+      "amount": 6.9,
+      "turnover": 1.2,
+      "mcap": 2100,
+      "score": 20.3,
+      "sector": "家电",
+      "signal": "稳健走势+高股息"
+    },
+    {
+      "rank": 6,
+      "code": "688981",
+      "name": "中芯国际",
+      "price": 145.8,
+      "changePct": 0.14,
+      "amount": 42.5,
+      "turnover": 1.9,
+      "mcap": 5800,
+      "score": 19.8,
+      "sector": "半导体",
+      "signal": "横盘整理"
+    },
+    {
+      "rank": 7,
+      "code": "002156",
+      "name": "通富微电",
+      "price": 70.0,
+      "changePct": -1.75,
+      "amount": 41.3,
+      "turnover": 4.8,
+      "mcap": 540,
+      "score": 18.5,
+      "sector": "先进封装",
+      "signal": "回调观察+AI主线"
+    },
+    {
+      "rank": 8,
+      "code": "605358",
+      "name": "立昂微",
+      "price": 67.75,
+      "changePct": -1.4,
+      "amount": 8.5,
+      "turnover": 2.8,
+      "mcap": 390,
+      "score": 17.2,
+      "sector": "半导体",
+      "signal": "回调观察"
+    }
+  ]
 }
