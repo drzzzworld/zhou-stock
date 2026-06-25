@@ -1,6 +1,111 @@
 {
-  "updated": "2026-06-24T16:34:25.454653",
-  "date": "2026-06-24",
+  "updated": "2026-06-25T16:38:59.502100",
+  "date": "2026-06-25",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "300223",
+      "name": "北京君正",
+      "price": 237.36,
+      "changePct": 20.0,
+      "amount": 126.6,
+      "turnover": 0,
+      "mcap": 1148.0,
+      "score": 78.3,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "688381",
+      "name": "帝奥微",
+      "price": 51.9,
+      "changePct": 20.0,
+      "amount": 15.1,
+      "turnover": 0,
+      "mcap": 128.5,
+      "score": 75.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "688380",
+      "name": "中微半导",
+      "price": 61.74,
+      "changePct": 20.0,
+      "amount": 14.4,
+      "turnover": 0,
+      "mcap": 247.2,
+      "score": 75.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "688376",
+      "name": "美埃科技",
+      "price": 101.52,
+      "changePct": 20.0,
+      "amount": 7.8,
+      "turnover": 0,
+      "mcap": 137.3,
+      "score": 74.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "688669",
+      "name": "聚石化学",
+      "price": 88.73,
+      "changePct": 20.0,
+      "amount": 7.2,
+      "turnover": 0,
+      "mcap": 107.7,
+      "score": 74.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "688025",
+      "name": "杰普特",
+      "price": 498.29,
+      "changePct": 18.94,
+      "amount": 36.6,
+      "turnover": 0,
+      "mcap": 473.6,
+      "score": 74.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "300806",
+      "name": "斯迪克",
+      "price": 117.88,
+      "changePct": 17.77,
+      "amount": 39.4,
+      "turnover": 0,
+      "mcap": 534.4,
+      "score": 72.3,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "688115",
+      "name": "思林杰",
+      "price": 66.36,
+      "changePct": 18.29,
+      "amount": 2.4,
+      "turnover": 0,
+      "mcap": 44.2,
+      "score": 69.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
