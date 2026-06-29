@@ -1,6 +1,111 @@
 {
-  "updated": "2026-06-26T10:40:37.808233",
-  "date": "2026-06-26",
+  "updated": "2026-06-29T12:19:22.045927",
+  "date": "2026-06-29",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "000988",
+      "name": "华工科技",
+      "price": 177.03,
+      "changePct": 10.0,
+      "amount": 199.6,
+      "turnover": 0,
+      "mcap": 1780.0,
+      "score": 58.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "000021",
+      "name": "深科技",
+      "price": 58.86,
+      "changePct": 10.0,
+      "amount": 137.7,
+      "turnover": 0,
+      "mcap": 926.7,
+      "score": 58.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "002409",
+      "name": "雅克科技",
+      "price": 207.46,
+      "changePct": 10.0,
+      "amount": 84.4,
+      "turnover": 0,
+      "mcap": 987.4,
+      "score": 57.8,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "600378",
+      "name": "昊华科技",
+      "price": 68.53,
+      "changePct": 10.0,
+      "amount": 58.6,
+      "turnover": 0,
+      "mcap": 884.0,
+      "score": 57.3,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "603650",
+      "name": "彤程新材",
+      "price": 94.41,
+      "changePct": 10.0,
+      "amount": 56.6,
+      "turnover": 0,
+      "mcap": 581.6,
+      "score": 57.3,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "600707",
+      "name": "彩虹股份",
+      "price": 15.35,
+      "changePct": 9.96,
+      "amount": 56.9,
+      "turnover": 0,
+      "mcap": 550.8,
+      "score": 57.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688797",
+      "name": "C臻宝",
+      "price": 598.28,
+      "changePct": 9.76,
+      "amount": 65.4,
+      "turnover": 0,
+      "mcap": 929.1,
+      "score": 57.0,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "002859",
+      "name": "洁美科技",
+      "price": 114.15,
+      "changePct": 10.0,
+      "amount": 44.6,
+      "turnover": 0,
+      "mcap": 492.2,
+      "score": 56.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
