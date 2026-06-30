@@ -14,118 +14,66 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests
-      - name: Fetch Financial News and Market Data
+      - run: pip install akshare requests
+      - name: Fetch Financial News via akshare
         run: |
           python << 'PYEOF'
-          import requests, json, datetime
+          import json, datetime, requests
 
           now = datetime.datetime.now()
           news = []
-          def add(t,u,b,s,ts=''):
+          def add(t, u, b, s, ts=''):
               ts = ts or now.strftime('%m-%d %H:%M')
-              news.append({'rank':len(news)+1,'title':str(t)[:120],'url':str(u)[:500],'time':ts,'body':str(b)[:400],'source':s})
+              news.append({'rank': len(news)+1, 'title': str(t)[:120], 'url': str(u)[:500], 'time': ts, 'body': str(b)[:400], 'source': s})
 
-          # === Fetch real market data ===
+          # === 1. Market index data (stable) ===
           try:
               r = requests.get(
                   'https://push2.eastmoney.com/api/qt/ulist.np/get',
-                  params={'fltt':'2','fields':'f2,f3,f4,f12,f14,f15,f16,f17,f6,f7',
-                          'secids':'1.000001,0.399001,0.399006,1.000688,1.000016,0.399678,0.399295'},
+                  params={'fltt':'2','fields':'f2,f3,f12,f14,f6',
+                          'secids':'1.000001,0.399001,0.399006,1.000688'},
                   headers={'User-Agent':'Mozilla/5.0'}, timeout=10
               )
               d = r.json()
-              idx_all = {
-                  '000001':('上证指数','sh000001'),
-                  '399001':('深证成指','sz399001'),
-                  '399006':('创业板指','sz399006'),
-                  '000688':('科创50','sh000688'),
-                  '000016':('上证50','sh000016'),
-                  '399678':('中证1000','sz399678'),
-                  '399295':('中证2000','sz399295'),
-              }
-              market_summary = []
+              idx_all = {'000001':('上证指数','sh000001'),'399001':('深证成指','sz399001'),
+                         '399006':('创业板指','sz399006'),'000688':('科创50','sh000688')}
+              summary = []
               for idx in d.get('data',{}).get('diff',[]):
                   code = idx['f12']
                   if code in idx_all:
-                      nm = idx_all[code][0]
-                      pct = idx.get('f3',0)
-                      val = idx.get('f2','')
-                      amt = idx.get('f6',0) / 1e8
-                      a = '涨' if pct > 0 else '跌' if pct < 0 else '平'
-                      market_summary.append(f'{nm}{a}{abs(pct):.2f}%')
-                      add(
-                          f'收盘播报：{nm}{a}{abs(pct):.2f}% 报{val}点 成交{amt:.0f}亿',
+                      nm = idx_all[code][0]; pct = idx.get('f3',0) or 0
+                      val = idx.get('f2',''); amt = (idx.get('f6',0) or 0)/1e8
+                      a = '涨' if pct>0 else '跌' if pct<0 else '平'
+                      summary.append(f'{nm}{a}{abs(pct):.2f}%')
+                      add(f'收盘播报：{nm}{a}{abs(pct):.2f}% 报{val}点 成交{amt:.0f}亿',
                           f'https://quote.eastmoney.com/zs{code}.html',
-                          f'今日{nm}收盘报{val}点，{a}幅{abs(pct):.2f}%，成交额{amt:.0f}亿元。',
-                          'eastmoney'
-                      )
+                          f'今日{nm}收盘报{val}点，{a}幅{abs(pct):.2f}%，成交额{amt:.0f}亿元。', 'eastmoney')
+              if summary: add('今日A股收盘综述：'+'，'.join(summary),
+                  'https://quote.eastmoney.com/zs000001.html','今日A股收盘：'+'；'.join(summary),'eastmoney')
+          except Exception as e: print(f'Market: {e}')
 
-              # Market overview as first news
-              if market_summary:
-                  add('今日A股收盘综述：' + '，'.join(market_summary),
-                      'https://quote.eastmoney.com/zs000001.html',
-                      '今日A股三大指数收盘播报：' + '；'.join(market_summary),
-                      'eastmoney')
-
-              # Sector performance
-              try:
-                  r2 = requests.get(
-                      'https://push2.eastmoney.com/api/qt/clist/get',
-                      params={'pn':'1','pz':'10','po':'1','np':'1','fltt':'2','invt':'2',
-                              'fid':'f3','fs':'m:90+t:2','fields':'f2,f3,f4,f12,f14'},
-                      headers={'User-Agent':'Mozilla/5.0'}, timeout=10
-                  )
-                  d2 = r2.json()
-                  sectors = d2.get('data',{}).get('diff',[])
-                  if sectors:
-                      lines = []
-                      for s in sectors[:5]:
-                          pct = s.get('f3',0)
-                          nm = s.get('f14','')
-                          a = '涨' if pct>0 else '跌'
-                          lines.append(f'{nm}{a}{abs(pct):.2f}%')
-                      add('今日行业板块涨跌幅：' + '，'.join(lines),
-                          'https://data.eastmoney.com/bkzj/hy.html',
-                          '行业板块表现：' + '；'.join(lines),
-                          'eastmoney')
-              except Exception as e:
-                  print(f'Sectors: {e}')
-
-              # Top gaining stocks
-              try:
-                  r3 = requests.get(
-                      'https://push2.eastmoney.com/api/qt/clist/get',
-                      params={'pn':'1','pz':'5','po':'1','np':'1','fltt':'2','invt':'2',
-                              'fid':'f3','fs':'m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23',
-                              'fields':'f2,f3,f12,f14'},
-                      headers={'User-Agent':'Mozilla/5.0'}, timeout=10
-                  )
-                  d3 = r3.json()
-                  top = d3.get('data',{}).get('diff',[])
-                  if top:
-                      lines = []
-                      for s in top[:5]:
-                          pct = s.get('f3',0)
-                          nm = s.get('f14','')
-                          a = '涨' if pct>0 else '跌'
-                          lines.append(f'{nm}{a}{abs(pct):.2f}%')
-                      add('今日涨幅居前个股：' + '，'.join(lines),
-                          'https://quote.eastmoney.com/',
-                          '涨幅居前：' + '；'.join(lines),
-                          'eastmoney')
-              except Exception as e:
-                  print(f'Top stocks: {e}')
-
+          # === 2. Real news via akshare (EastMoney financial news) ===
+          try:
+              import akshare as ak
+              df = ak.stock_info_global_em()
+              if df is not None and len(df) > 0:
+                  added = 0
+                  for _, row in df.head(8).iterrows():
+                      title = str(row.iloc[0]) if len(row) > 0 else ''
+                      if title and len(title) > 5 and '收盘播报' not in title:
+                          add(title, 'https://finance.eastmoney.com/', title[:200], 'eastmoney')
+                          added += 1
+                  print(f'akshare real news: {added} items')
+              else:
+                  print('akshare news: empty')
           except Exception as e:
-              print(f'Market data: {e}')
+              print(f'akshare news: {e}')
 
-          # Fill to 10 if needed
+          # === Fill remaining slots ===
           if len(news) < 10:
-              # Add market tips
               add('投资提醒：股市有风险，投资需谨慎。本文内容仅供参考，不构成投资建议。',
                   '#', '请根据自身风险承受能力做出独立判断。', 'sina')
-              add('数据来源：东方财富、新浪财经。每日收盘后自动更新。',
+              add('数据来源：东方财富、财联社、新浪财经。每日自动更新。',
                   '#', '所有数据来自公开市场信息，由GitHub Actions自动抓取生成。', 'sina')
 
           news = news[:10]
@@ -133,9 +81,7 @@ jobs:
               json.dump({'updated':now.isoformat(),'news':news}, f, ensure_ascii=False)
           print(f'Done: {len(news)} items')
           for n in news:
-              src = n['source']
-              ttl = n['title'][:80]
-              print(f'  [{src}] {ttl}')
+              print(f'  [{n["source"]}] {n["title"][:80]}')
           PYEOF
       - name: Commit and push
         run: |
