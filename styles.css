@@ -39,6 +39,11 @@
   --yellow: #e8a838;
   --yellow-soft: rgba(232,168,56,0.12);
 
+  /* JS shorthand refs — keep in sync with semantic above */
+  --accent-green: var(--green);
+  --accent-red: var(--red);
+  --accent-yellow: var(--yellow);
+
   /* Shadows — tinted, not generic black */
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.35), 0 0 1px rgba(75,140,247,0.04);
@@ -469,12 +474,6 @@ body::before{
 .disclaimer-content strong{color:var(--red);font-size:12px}
 .disclaimer-content p{font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.6}
 .footer{text-align:center;padding:var(--space-xl) var(--space-lg);border-top:1px solid var(--border-subtle);color:var(--text-dim);font-size:11px}
-
-/* ===== Entrance Animation — cards only, not news ===== */
-.pick-card,.method-card,.stat-card,.history-table tbody tr{
-  opacity:0;transform:translateY(10px);
-  transition:opacity 0.4s var(--ease-out),transform 0.4s var(--ease-out);
-}
 
 /* ===== Print ===== */
 @media print{

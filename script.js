@@ -22,54 +22,7 @@
 
   // ===== A. LIVE STOCK TICKER =====
   const tickerTrack = document.getElementById('ticker-track');
-  const tickerTime = document.getElementById('ticker-time');
   let stockPrices = {};
-
-  // Stock code to EastMoney secid mapping
-  function getSecId(code) {
-    if (code.startsWith('sh')) return '1.' + code.replace('sh', '');
-    return '0.' + code.replace('sz', '');
-  }
-
-  function updateTicker() {
-    if (!trackedStocks || trackedStocks.length === 0) return;
-
-    // Fetch from same-origin prices.json (updated every 5 min by GitHub Actions)
-    fetch('prices.json?t=' + Date.now())
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (!data || !data.stocks) { loadCachedPrices(); return; }
-        var newPrices = {};
-        trackedStocks.forEach(function(s) {
-          if (data.stocks[s.name]) {
-            var p = data.stocks[s.name];
-            newPrices[s.name] = {
-              code: s.code,
-              price: p.price,
-              change: (p.price - (p.price / (1 + p.changePct/100))),
-              changePct: p.changePct
-            };
-          }
-        });
-        if (Object.keys(newPrices).length > 0) {
-          stockPrices = newPrices;
-          renderTicker();
-          document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
-          try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
-        }
-      })
-      .catch(function() { loadCachedPrices(); });
-  }
-
-  function loadCachedPrices() {
-    try {
-      var cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
-      if (cached && cached.prices && Object.keys(cached.prices).length > 0) {
-        stockPrices = cached.prices;
-        renderTicker();
-      }
-    } catch(e) {}
-  }
 
   function renderTicker() {
     if (Object.keys(stockPrices).length === 0) {
@@ -85,25 +38,46 @@
         entries.push('<span class="ticker-item"><span class="tname">' + s.name + '</span><span class="tprice">' + p.price.toFixed(2) + '</span><span class="tchange" style="color:' + clr + '">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</span></span>');
       }
     });
-    // Duplicate for seamless scroll
+    if (entries.length === 0) return;
     tickerTrack.innerHTML = entries.join('') + '&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;' + entries.join('');
     tickerTrack.style.animationDuration = Math.max(20, entries.length * 5) + 's';
+    document.getElementById('ticker-time').textContent = new Date().toLocaleTimeString('zh-CN');
   }
 
-  // Check if weekend (market closed Sat/Sun)
-  function isWeekend() { var d = new Date(); return d.getDay() === 0 || d.getDay() === 6; }
-
-  // Init: load cache first, always fetch once, then skip on weekends
-  function initTicker() {
+  function loadCachedPrices() {
     try {
-      var cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
+      const cached = JSON.parse(localStorage.getItem('zhou_stock_prices'));
       if (cached && cached.prices) { stockPrices = cached.prices; renderTicker(); }
     } catch(e) {}
-    updateTicker(); // Always fetch once on page load
   }
-  initTicker();
-  // Auto-refresh every 5 min, skip on weekends
-  setInterval(function() { if (!isWeekend()) updateTicker(); }, 300000);
+
+  function updateTicker() {
+    fetch('prices.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.stocks) {
+          const fresh = {};
+          trackedStocks.forEach(s => {
+            if (data.stocks[s.name]) {
+              const p = data.stocks[s.name];
+              fresh[s.name] = { code: s.code, price: p.price, changePct: p.changePct };
+            }
+          });
+          if (Object.keys(fresh).length > 0) {
+            stockPrices = fresh;
+            renderTicker();
+            try { localStorage.setItem('zhou_stock_prices', JSON.stringify({ time: Date.now(), prices: stockPrices })); } catch(e) {}
+          }
+        } else { loadCachedPrices(); }
+      })
+      .catch(() => loadCachedPrices());
+  }
+
+  function isWeekend() { const d = new Date(); return d.getDay() === 0 || d.getDay() === 6; }
+
+  loadCachedPrices();
+  updateTicker();
+  setInterval(() => { if (!isWeekend()) updateTicker(); }, 300000);
 
   // ===== B. FINANCIAL NEWS =====
   let newsData = [];
@@ -112,101 +86,78 @@
   const newsModalOverlay = document.getElementById('news-modal-overlay');
   const newsModalContent = document.getElementById('news-modal-content');
 
-  function fetchNews() {
-    newsList.innerHTML = '<div class="news-loading">⏳ 正在加载最新财经新闻...</div>';
-    // Fetch from same-origin JSON (updated by GitHub Actions every 6h)
-    fetch('news-data.json?t=' + Date.now())
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.news && data.news.length > 0) {
-          newsData = data.news;
-          renderNews();
-          if (newsTime) {
-            var d = new Date(data.updated);
-            newsTime.textContent = '更新于 ' + d.toLocaleString('zh-CN');
-          }
-          try { localStorage.setItem('zhou_news_cache', JSON.stringify({time:Date.now(),news:newsData})); } catch(e) {}
-        } else {
-          loadFallbackNews();
-        }
-      })
-      .catch(function() { loadFallbackNews(); });
+  function openNews(idx) {
+    const n = newsData[idx];
+    if (!n) return;
+    const srcLabel = { eastmoney: '东方财富', sina: '新浪财经', cls: '财联社' }[n.source] || n.source;
+    newsModalContent.innerHTML =
+      '<button class="modal-close" onclick="document.getElementById(\'news-modal-overlay\').classList.remove(\'active\')">&times;</button>' +
+      '<h2 style="font-size:22px;margin-bottom:8px;color:var(--text-primary);">' + n.title + '</h2>' +
+      '<div class="news-detail-time">' + n.time + ' · 来源：' + srcLabel + '</div>' +
+      '<div class="news-detail-body"><p>' + n.body + '</p></div>' +
+      (n.url && n.url !== '#' ? '<a class="news-detail-link" href="' + n.url + '" target="_blank" rel="noopener">查看原文 →</a>' : '') +
+      '<div style="margin-top:16px;display:flex;gap:12px;">' +
+        (idx > 0 ? '<button class="btn-refresh" onclick="openNews(' + (idx-1) + ')">← 上一篇</button>' : '') +
+        (idx < newsData.length-1 ? '<button class="btn-refresh" onclick="openNews(' + (idx+1) + ')">下一篇 →</button>' : '') +
+      '</div>';
+    newsModalOverlay.classList.add('active');
+  }
+
+  function renderNews() {
+    const srcLabel = { eastmoney: '东方财富', sina: '新浪财经', cls: '财联社' };
+    newsList.innerHTML = newsData.map(n => {
+      let rankClass = ''; if (n.rank === 1) rankClass = 'r1'; else if (n.rank === 2) rankClass = 'r2'; else if (n.rank === 3) rankClass = 'r3';
+      const srcClass = { eastmoney: 'source-eastmoney', sina: 'source-sina', cls: 'source-cls' }[n.source] || '';
+      return '<div class="news-card" onclick="openNews(' + (n.rank-1) + ')">' +
+        '<span class="news-rank ' + rankClass + '">' + (n.rank < 10 ? '0' : '') + n.rank + '</span>' +
+        '<div class="news-content"><div class="news-title">' + n.title + '</div>' +
+        '<div class="news-meta"><span class="news-source-tag ' + srcClass + '">' + (srcLabel[n.source]||n.source) + '</span><span>' + n.time + '</span></div></div>' +
+        '</div>';
+    }).join('');
+    if (newsTime) newsTime.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
   }
 
   function loadFallbackNews() {
-    // Use cached news if available
     try {
-      var cached = JSON.parse(localStorage.getItem('zhou_news_cache'));
+      const cached = JSON.parse(localStorage.getItem('zhou_news_cache'));
       if (cached && cached.news && cached.news.length > 0) {
-        newsData = cached.news;
-        renderNews();
+        newsData = cached.news; renderNews();
         if (newsTime) newsTime.textContent = '更新于 ' + new Date(cached.time).toLocaleTimeString('zh-CN') + '（缓存）';
         return;
       }
     } catch(e) {}
-    loadNewsFromBuiltIn();
-  }
-
-  function loadNewsFromBuiltIn() {
-    var today = new Date();
-    var dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-    var titles = [
-      'A股三大指数震荡分化 芯片半导体板块集体退潮 电力消费走强',
-      '国家大基金高位减持沪硅产业 半导体板块承压',
+    const today = new Date();
+    const dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
+    const builtIn = [
+      'A股三大指数震荡分化 半导体板块集体退潮 电力消费走强',
+      '国家大基金减持落地 先进封装板块逆势上涨',
       '南方电网电力负荷连续刷新纪录 电力股掀涨停潮',
       '618大促启动 家电以旧换新补贴加码 空调销量大增',
       '台积电资本开支上调至580亿美元 硅片需求持续旺盛',
-      '白酒板块逆势大涨 酒鬼酒老白干酒涨停 机构看好消费复苏',
+      '白酒板块逆势大涨 机构看好消费复苏',
       '西安奕材武汉第三工厂全面封顶 12英寸硅片产能将达120万片',
       '宁德时代固态电池量产时间表公布 预计2027年装车',
       '美联储6月议息会议临近 市场预期维持利率不变',
       '格力电器股价逆势上扬 夏季高温以旧换新双催化'
     ];
-    newsData = titles.map(function(t, i) {
-      return {rank:i+1, title:t, source:'sina', time:dateStr, url:'https://www.baidu.com/s?wd='+encodeURIComponent(t), body:'点击"查看原文"通过百度搜索完整新闻。'};
-    });
+    newsData = builtIn.map((t, i) => ({ rank: i+1, title: t, source: 'sina', time: dateStr, url: 'https://www.baidu.com/s?wd=' + encodeURIComponent(t), body: '点击查看原文通过百度搜索完整新闻。' }));
     renderNews();
   }
 
-    function renderNews() {
-    newsList.innerHTML = newsData.map(n => {
-      let rankClass = ''; if (n.rank === 1) rankClass = 'r1'; else if (n.rank === 2) rankClass = 'r2'; else if (n.rank === 3) rankClass = 'r3';
-      let srcClass = 'source-eastmoney'; if (n.source === 'sina') srcClass = 'source-sina'; else if (n.source === 'cls') srcClass = 'source-cls';
-      const srcLabel = { eastmoney: '东方财富', sina: '新浪财经', cls: '财联社' }[n.source] || n.source;
-      return '<div class="news-card" data-news-idx="' + (n.rank-1) + '" onclick="window._openNews(' + (n.rank-1) + ')">' +
-        '<span class="news-rank ' + rankClass + '">' + (n.rank < 10 ? '0' : '') + n.rank + '</span>' +
-        '<div class="news-content"><div class="news-title">' + n.title + '</div>' +
-        '<div class="news-meta"><span class="news-source-tag ' + srcClass + '">' + srcLabel + '</span><span>' + n.time + '</span></div></div>' +
-        '</div>';
-    }).join('');
-    if (newsTime) newsTime.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
-    try { localStorage.setItem('zhou_news_time', Date.now().toString()); } catch(e) {}
+  function fetchNews() {
+    fetch('news-data.json?t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.news && data.news.length > 0) {
+          newsData = data.news; renderNews();
+          try { localStorage.setItem('zhou_news_cache', JSON.stringify({ time: Date.now(), news: newsData })); } catch(e) {}
+        } else { loadFallbackNews(); }
+      })
+      .catch(() => loadFallbackNews());
   }
 
-  window._openNews = function(idx) {
-    const n = newsData[idx];
-    if (!n) return;
-    newsModalContent.innerHTML =
-      '<button class="modal-close" onclick="document.getElementById(\'news-modal-overlay\').classList.remove(\'active\')">&times;</button>' +
-      '<h2 style="font-size:22px;margin-bottom:8px;color:var(--text-primary);">' + n.title + '</h2>' +
-      '<div class="news-detail-time">' + n.time + ' · 来源：' + ({eastmoney:'东方财富',sina:'新浪财经',cls:'财联社'}[n.source]||n.source) + '</div>' +
-      '<div class="news-detail-body"><p>' + n.body + '</p></div>' +
-      (n.url && n.url !== '#' ? '<a class="news-detail-link" href="' + n.url + '" target="_blank" rel="noopener">查看原文 →</a>' : '') +
-      '<div style="margin-top:16px;display:flex;gap:12px;">' +
-        (idx > 0 ? '<button class="btn-refresh" onclick="window._openNews(' + (idx-1) + ')">← 上一篇</button>' : '') +
-        (idx < newsData.length-1 ? '<button class="btn-refresh" onclick="window._openNews(' + (idx+1) + ')">下一篇 →</button>' : '') +
-      '</div>';
-    newsModalOverlay.classList.add('active');
-  };
-  window.refreshNews = function() { fetchNews(); };
-
-  newsModalOverlay.addEventListener('click', function(e) { if (e.target === newsModalOverlay) newsModalOverlay.classList.remove('active'); });
-
-  // Load news from JSON (updated by GitHub Actions every 6h)
-  // Show loading, then fetch - fallback to built-in if fetch fails
-  newsList.innerHTML = '<div class="news-loading">⏳ 正在加载最新财经新闻...</div>';
+  newsModalOverlay.addEventListener('click', e => { if (e.target === newsModalOverlay) newsModalOverlay.classList.remove('active'); });
   fetchNews();
-  // Refresh every 2 hours
   setInterval(fetchNews, 7200000);
 
   // ===== C. SECTOR FILTERS =====
@@ -376,88 +327,59 @@
     observer.observe(el);
   });
 
-  // ===== K. SYNC LIVE PRICES TO ALL CARDS =====
+  // ===== K. SYNC LIVE PRICES TO CARDS =====
   function syncPricesToCards() {
-    if (Object.keys(stockPrices).length === 0) return;
-    // Update top pick
-    var tpName = currentWeek.topPick.name;
-    if (stockPrices[tpName]) {
-      var el = document.getElementById('live-price-' + currentWeek.topPick.code);
+    const tp = currentWeek.topPick;
+    if (stockPrices[tp.name]) {
+      const el = document.getElementById('live-price-' + tp.code);
       if (el) {
-        var p = stockPrices[tpName];
-        var arrow = p.changePct >= 0 ? '↑' : '↓';
-        el.innerHTML = p.price.toFixed(2) + ' 元 <span style=\"font-size:14px;color:' + (p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)') + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</span>';
+        const p = stockPrices[tp.name];
+        const clr = p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+        el.innerHTML = p.price.toFixed(2) + ' 元 <span style="font-size:14px;color:' + clr + '">' + (p.changePct>=0?'↑':'↓') + Math.abs(p.changePct).toFixed(2) + '%</span>';
       }
     }
-    // Update secondary picks
-    currentWeek.secondaryPicks.forEach(function(sp) {
+    currentWeek.secondaryPicks.forEach(sp => {
       if (stockPrices[sp.name]) {
-        var p = stockPrices[sp.name];
-        var cards = document.querySelectorAll('.pick-card');
-        cards.forEach(function(card) {
-          if (card.dataset.code === sp.code) {
-            var valEl = card.querySelector('.pick-metric-value');
-            if (valEl) {
-              var arrow = p.changePct >= 0 ? '↑' : '↓';
-              valEl.innerHTML = p.price.toFixed(2) + ' / <span style=\"color:var(--accent-green)\">' + sp.targetPrice + '</span> <span style=\"font-size:12px;color:' + (p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)') + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</span>';
-            }
-          }
-        });
+        const p = stockPrices[sp.name];
+        const el = document.querySelector('.pick-card[data-code="' + sp.code + '"] .pick-metric-value');
+        if (el) {
+          const clr = p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+          el.innerHTML = p.price.toFixed(2) + ' / <span style="color:var(--accent-green)">' + sp.targetPrice + '</span> <span style="font-size:12px;color:' + clr + '">' + (p.changePct>=0?'↑':'↓') + Math.abs(p.changePct).toFixed(2) + '%</span>';
+        }
       }
     });
   }
-  // Initial sync when prices arrive, then every time ticker updates
-  var origRenderTicker = renderTicker;
-  renderTicker = function() { origRenderTicker(); syncPricesToCards(); };
-  setInterval(syncPricesToCards, 300000);
+  setInterval(syncPricesToCards, 120000);
 
   // ===== DAILY PICKS =====
   function loadDailyPicks() {
-    var container = document.getElementById('daily-picks-content');
+    const container = document.getElementById('daily-picks-content');
     if (!container) return;
-    container.innerHTML = '<div class=\"news-loading\">⏳ 正在加载今日选股...</div>';
-
+    container.innerHTML = '<div class="news-loading">⏳ 正在加载今日选股...</div>';
     fetch('daily-picks.json?t=' + Date.now())
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (!data || !data.picks || data.picks.length === 0 || data.picks[0].name === '暂无') {
-          container.innerHTML = '<div class=\"no-picks\">📡 今日选股结果尚未生成<br><span style=\"font-size:12px;color:var(--text-dim)\">每个交易日收盘后自动更新</span></div>';
-          if (document.getElementById('daily-date-tag')) {
-            document.getElementById('daily-date-tag').textContent = data && data.date ? data.date : '--';
-          }
+      .then(r => r.json())
+      .then(data => {
+        if (!data || !data.picks || data.picks.length === 0) {
+          container.innerHTML = '<div class="no-picks">📡 今日选股结果尚未生成<br><span style="font-size:12px;color:var(--text-dim)">每个交易日收盘后自动更新</span></div>';
           return;
         }
         document.getElementById('daily-date-tag').textContent = data.date || '--';
-        var du = document.getElementById('daily-update-time');
-        if (du && data.updated) {
-          du.textContent = '更新于 ' + new Date(data.updated).toLocaleString('zh-CN');
-        }
-        container.innerHTML = data.picks.map(function(p) {
-          var rc = p.rank === 1 ? 'r1' : p.rank === 2 ? 'r2' : p.rank === 3 ? 'r3' : '';
-          var clr = p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-          var arrow = p.changePct >= 0 ? '↑' : '↓';
-          return '<div class=\"daily-pick-card\">' +
-            '<span class=\"daily-pick-rank ' + rc + '\">' + (p.rank < 10 ? '0' : '') + p.rank + '</span>' +
-            '<div class=\"daily-pick-info\">' +
-              '<div class=\"daily-pick-name\">' + (p.name || p.code) + '</div>' +
-              '<div class=\"daily-pick-code\">' + p.code + '</div>' +
-              '<div class=\"daily-pick-signal\">' + (p.signal || p.sector || '') + '</div>' +
-            '</div>' +
-            '<div class=\"daily-pick-metrics\">' +
-              '<div class=\"daily-pick-price\">' + (p.price > 0 ? p.price.toFixed(2) : '--') + '</div>' +
-              '<div class=\"daily-pick-change\" style=\"color:' + clr + '\">' + arrow + Math.abs(p.changePct).toFixed(2) + '%</div>' +
-              '<div class=\"daily-pick-score\">评分 ' + (p.score || '--') + '</div>' +
-            '</div></div>';
+        const du = document.getElementById('daily-update-time');
+        if (du && data.updated) du.textContent = '更新于 ' + new Date(data.updated).toLocaleString('zh-CN');
+        container.innerHTML = data.picks.map(p => {
+          const rc = p.rank === 1 ? 'r1' : p.rank === 2 ? 'r2' : p.rank === 3 ? 'r3' : '';
+          const clr = p.changePct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+          return '<div class="daily-pick-card">' +
+            '<span class="daily-pick-rank ' + rc + '">' + (p.rank < 10 ? '0' : '') + p.rank + '</span>' +
+            '<div class="daily-pick-info"><div class="daily-pick-name">' + (p.name || p.code) + '</div><div class="daily-pick-code">' + p.code + '</div><div class="daily-pick-signal">' + (p.signal || '') + '</div></div>' +
+            '<div class="daily-pick-metrics"><div class="daily-pick-price">' + (p.price > 0 ? p.price.toFixed(2) : '--') + '</div><div class="daily-pick-change" style="color:' + clr + '">' + (p.changePct>=0?'↑':'↓') + Math.abs(p.changePct).toFixed(2) + '%</div><div class="daily-pick-score">评分 ' + (p.score || '--') + '</div></div></div>';
         }).join('');
       })
-      .catch(function() {
-        container.innerHTML = '<div class=\"no-picks\">📡 今日选股结果加载失败</div>';
-      });
+      .catch(() => { container.innerHTML = '<div class="no-picks">📡 今日选股结果加载失败</div>'; });
   }
   loadDailyPicks();
 
-  console.log('🚀 舟-自用股票网 v3.0 loaded');
+  console.log('🚀 舟-自用股票网 v3.1 loaded');
   console.log('   📊 ' + totalPicks + ' picks | ' + totalWeeks + ' weeks | 🏆 ' + winRate + '% win rate');
-  console.log('   📰 10 news articles | 💹 ' + (trackedStocks ? trackedStocks.length : 0) + ' stocks tracked');
-  console.log('   🔄 Prices refresh every 5 min | News refreshes every 12 hours');
+  console.log('   📰 News + 💹 ' + trackedStocks.length + ' stocks tracked | 🔄 Auto-refresh');
 })();
