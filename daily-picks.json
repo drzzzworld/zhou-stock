@@ -1,6 +1,111 @@
 {
-  "updated": "2026-07-03T10:23:24.876187",
-  "date": "2026-07-03",
+  "updated": "2026-07-06T11:52:02.530061",
+  "date": "2026-07-06",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "300684",
+      "name": "中石科技",
+      "price": 74.41,
+      "changePct": 20.0,
+      "amount": 33.6,
+      "turnover": 0,
+      "mcap": 222.9,
+      "score": 76.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "301191",
+      "name": "菲菱科思",
+      "price": 135.01,
+      "changePct": 20.0,
+      "amount": 17.0,
+      "turnover": 0,
+      "mcap": 130.8,
+      "score": 75.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "301317",
+      "name": "鑫磊股份",
+      "price": 62.21,
+      "changePct": 20.0,
+      "amount": 3.7,
+      "turnover": 0,
+      "mcap": 97.8,
+      "score": 73.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "688039",
+      "name": "当虹科技",
+      "price": 43.56,
+      "changePct": 20.0,
+      "amount": 3.4,
+      "turnover": 0,
+      "mcap": 48.2,
+      "score": 73.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "688689",
+      "name": "银河微电",
+      "price": 80.75,
+      "changePct": 18.7,
+      "amount": 12.4,
+      "turnover": 0,
+      "mcap": 106.3,
+      "score": 72.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "300716",
+      "name": "*ST泉为",
+      "price": 29.09,
+      "changePct": 19.07,
+      "amount": 3.6,
+      "turnover": 0,
+      "mcap": 46.5,
+      "score": 71.8,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688103",
+      "name": "国力电子",
+      "price": 85.26,
+      "changePct": 16.78,
+      "amount": 7.5,
+      "turnover": 0,
+      "mcap": 81.3,
+      "score": 68.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "301269",
+      "name": "华大九天",
+      "price": 117.21,
+      "changePct": 14.05,
+      "amount": 39.0,
+      "turnover": 0,
+      "mcap": 639.3,
+      "score": 64.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
