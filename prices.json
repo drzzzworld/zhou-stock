@@ -1,1 +1,49 @@
-{"updated": "2026-07-15T06:17:13.402971", "stocks": {"紫光国微": {"price": 72.77, "changePct": -6.97}, "天赐材料": {"price": 37.76, "changePct": -1.07}, "巨星科技": {"price": 29.26, "changePct": 2.67}, "通富微电": {"price": 79.32, "changePct": 1.86}, "格力电器": {"price": 39.84, "changePct": 1.68}, "士兰微": {"price": 39.13, "changePct": -6.39}, "药明康德": {"price": 130.1, "changePct": 2.03}, "宁德时代": {"price": 373.95, "changePct": 2.73}, "立昂微": {"price": 53.21, "changePct": -9.63}, "中芯国际": {"price": 153.82, "changePct": -4.45}}}
+{
+  "updated": "2026-07-15T15:13:25.429946",
+  "stocks": {
+    "通富微电": {
+      "price": 78.71,
+      "changePct": 1.08
+    },
+    "巨星科技": {
+      "price": 29.15,
+      "changePct": 2.28
+    },
+    "格力电器": {
+      "price": 39.83,
+      "changePct": 1.66
+    },
+    "天赐材料": {
+      "price": 37.55,
+      "changePct": -1.62
+    },
+    "紫光国微": {
+      "price": 72.24,
+      "changePct": -7.65
+    },
+    "士兰微": {
+      "price": 38.57,
+      "changePct": -7.73
+    },
+    "药明康德": {
+      "price": 131.5,
+      "changePct": 3.13
+    },
+    "宁德时代": {
+      "price": 373.0,
+      "changePct": 2.47
+    },
+    "中芯国际": {
+      "price": 153.64,
+      "changePct": -4.57
+    },
+    "综艺股份": {
+      "price": 6.15,
+      "changePct": -2.07
+    },
+    "西陇科学": {
+      "price": 8.23,
+      "changePct": 0.98
+    }
+  }
+}
