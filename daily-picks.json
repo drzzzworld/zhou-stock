@@ -1,6 +1,111 @@
 {
-  "updated": "2026-07-14T09:42:06.173422",
-  "date": "2026-07-14",
+  "updated": "2026-07-15T09:45:15.521944",
+  "date": "2026-07-15",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "002624",
+      "name": "完美世界",
+      "price": 11.24,
+      "changePct": 6.04,
+      "amount": 13.6,
+      "turnover": 0,
+      "mcap": 218.1,
+      "score": 47.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "605090",
+      "name": "九丰能源",
+      "price": 41.6,
+      "changePct": 5.58,
+      "amount": 26.3,
+      "turnover": 0,
+      "mcap": 293.7,
+      "score": 47.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "300015",
+      "name": "爱尔眼科",
+      "price": 8.88,
+      "changePct": 5.71,
+      "amount": 16.9,
+      "turnover": 0,
+      "mcap": 825.8,
+      "score": 47.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "688220",
+      "name": "翱捷科技-U",
+      "price": 123.71,
+      "changePct": 5.55,
+      "amount": 21.6,
+      "turnover": 0,
+      "mcap": 517.5,
+      "score": 47.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "600415",
+      "name": "小商品城",
+      "price": 10.43,
+      "changePct": 5.89,
+      "amount": 10.9,
+      "turnover": 0,
+      "mcap": 571.9,
+      "score": 46.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "603369",
+      "name": "今世缘",
+      "price": 25.91,
+      "changePct": 5.97,
+      "amount": 7.6,
+      "turnover": 0,
+      "mcap": 323.0,
+      "score": 46.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "002602",
+      "name": "世纪华通",
+      "price": 14.26,
+      "changePct": 5.01,
+      "amount": 32.0,
+      "turnover": 0,
+      "mcap": 1051.1,
+      "score": 46.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "300377",
+      "name": "赢时胜",
+      "price": 14.07,
+      "changePct": 5.79,
+      "amount": 8.4,
+      "turnover": 0,
+      "mcap": 105.7,
+      "score": 46.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
