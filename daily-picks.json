@@ -1,6 +1,111 @@
 {
-  "updated": "2026-07-17T09:42:07.992003",
-  "date": "2026-07-17",
+  "updated": "2026-07-20T10:36:31.745102",
+  "date": "2026-07-20",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "301190",
+      "name": "善水科技",
+      "price": 17.42,
+      "changePct": 19.97,
+      "amount": 2.1,
+      "turnover": 0,
+      "mcap": 37.4,
+      "score": 72.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "688057",
+      "name": "金达莱",
+      "price": 16.81,
+      "changePct": 19.99,
+      "amount": 1.4,
+      "turnover": 0,
+      "mcap": 46.4,
+      "score": 72.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "300040",
+      "name": "九洲集团",
+      "price": 6.83,
+      "changePct": 18.17,
+      "amount": 8.5,
+      "turnover": 0,
+      "mcap": 43.9,
+      "score": 71.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "300164",
+      "name": "通源石油",
+      "price": 12.2,
+      "changePct": 16.41,
+      "amount": 27.1,
+      "turnover": 0,
+      "mcap": 71.8,
+      "score": 69.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "300209",
+      "name": "行云科技",
+      "price": 25.84,
+      "changePct": 15.51,
+      "amount": 36.0,
+      "turnover": 0,
+      "mcap": 240.0,
+      "score": 67.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "301536",
+      "name": "星宸科技",
+      "price": 106.65,
+      "changePct": 16.11,
+      "amount": 30.8,
+      "turnover": 0,
+      "mcap": 449.8,
+      "score": 65.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688382",
+      "name": "益方生物-U",
+      "price": 26.04,
+      "changePct": 15.48,
+      "amount": 8.2,
+      "turnover": 0,
+      "mcap": 150.9,
+      "score": 65.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "300779",
+      "name": "惠城环保",
+      "price": 56.84,
+      "changePct": 14.09,
+      "amount": 9.6,
+      "turnover": 0,
+      "mcap": 169.0,
+      "score": 63.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
