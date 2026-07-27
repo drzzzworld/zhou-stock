@@ -1,6 +1,111 @@
 {
-  "updated": "2026-07-24T10:03:06.526561",
-  "date": "2026-07-24",
+  "updated": "2026-07-27T10:58:40.710434",
+  "date": "2026-07-27",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "301526",
+      "name": "国际复材",
+      "price": 30.84,
+      "changePct": 20.0,
+      "amount": 64.7,
+      "turnover": 0,
+      "mcap": 1162.9,
+      "score": 77.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "300214",
+      "name": "日科化学",
+      "price": 14.23,
+      "changePct": 19.98,
+      "amount": 10.3,
+      "turnover": 0,
+      "mcap": 66.2,
+      "score": 75.0,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "301085",
+      "name": "亚康股份",
+      "price": 61.51,
+      "changePct": 20.0,
+      "amount": 4.4,
+      "turnover": 0,
+      "mcap": 53.4,
+      "score": 73.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "300795",
+      "name": "米奥会展",
+      "price": 13.28,
+      "changePct": 19.96,
+      "amount": 4.6,
+      "turnover": 0,
+      "mcap": 39.7,
+      "score": 73.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "300753",
+      "name": "爱朋医疗",
+      "price": 21.91,
+      "changePct": 19.99,
+      "amount": 3.2,
+      "turnover": 0,
+      "mcap": 27.6,
+      "score": 73.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "688171",
+      "name": "纬德信息",
+      "price": 28.2,
+      "changePct": 20.0,
+      "amount": 1.2,
+      "turnover": 0,
+      "mcap": 33.0,
+      "score": 72.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "301234",
+      "name": "五洲医疗",
+      "price": 70.5,
+      "changePct": 20.0,
+      "amount": 7.3,
+      "turnover": 0,
+      "mcap": 47.9,
+      "score": 71.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "688146",
+      "name": "中船特气",
+      "price": 284.94,
+      "changePct": 15.98,
+      "amount": 65.4,
+      "turnover": 0,
+      "mcap": 1508.5,
+      "score": 69.4,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
