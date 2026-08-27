@@ -1,6 +1,111 @@
 {
-  "updated": "2026-08-26T08:26:40.584992",
-  "date": "2026-08-26",
+  "updated": "2026-08-27T18:26:10.957939",
+  "date": "2026-08-27",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "688300",
+      "name": "联瑞新材",
+      "price": 186.24,
+      "changePct": 20.0,
+      "amount": 37.7,
+      "turnover": 0,
+      "mcap": 449.7,
+      "score": 76.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "301666",
+      "name": "大普微-UW",
+      "price": 469.2,
+      "changePct": 20.0,
+      "amount": 9.6,
+      "turnover": 0,
+      "mcap": 2046.7,
+      "score": 74.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "688368",
+      "name": "晶丰明源",
+      "price": 140.28,
+      "changePct": 20.0,
+      "amount": 7.9,
+      "turnover": 0,
+      "mcap": 285.9,
+      "score": 74.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "301591",
+      "name": "肯特股份",
+      "price": 50.4,
+      "changePct": 20.0,
+      "amount": 7.8,
+      "turnover": 0,
+      "mcap": 55.1,
+      "score": 74.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "300368",
+      "name": "汇金股份",
+      "price": 9.62,
+      "changePct": 19.95,
+      "amount": 6.1,
+      "turnover": 0,
+      "mcap": 50.9,
+      "score": 74.2,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "301399",
+      "name": "英特科技",
+      "price": 21.24,
+      "changePct": 20.0,
+      "amount": 3.5,
+      "turnover": 0,
+      "mcap": 39.3,
+      "score": 73.6,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688790",
+      "name": "昂瑞微-UW",
+      "price": 114.1,
+      "changePct": 20.0,
+      "amount": 2.1,
+      "turnover": 0,
+      "mcap": 113.6,
+      "score": 72.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "301373",
+      "name": "凌玮科技",
+      "price": 116.8,
+      "changePct": 17.79,
+      "amount": 14.6,
+      "turnover": 0,
+      "mcap": 126.7,
+      "score": 71.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
