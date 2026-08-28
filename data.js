@@ -1,5 +1,5 @@
 const STOCK_DATA = {
-  "lastUpdated": "2026-07-31T13:15:43.114991Z",
+  "lastUpdated": "2026-08-28T21:30:07.244471Z",
   "trackedStocks": [
     {
       "name": "银轮股份",
@@ -63,11 +63,11 @@ const STOCK_DATA = {
     }
   ],
   "currentWeek": {
-    "weekLabel": "2026年第31周 (7/27 - 7/31)",
-    "weekId": "2026-W31",
+    "weekLabel": "2026年第35周 (8/24 - 8/28)",
+    "weekId": "2026-W35",
     "topPick": {
-      "name": "sh.000073",
-      "code": "000073",
+      "name": "sh.000122",
+      "code": "000122",
       "sector": "量化精选",
       "rating": "强烈推荐",
       "price": 50.0,
@@ -148,6 +148,45 @@ const STOCK_DATA = {
     ]
   },
   "history": [
+    {
+      "weekId": "2026-W31",
+      "weekLabel": "2026年第31周 (7/27 - 7/31)",
+      "topPick": "sh.000073",
+      "picks": [
+        {
+          "name": "sh.000073",
+          "code": "000073",
+          "sector": "量化精选",
+          "entryPrice": 50.0,
+          "currentPrice": 50.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000807",
+          "code": "000807",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000035",
+          "code": "000035",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000126",
+          "code": "000126",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        }
+      ]
+    },
     {
       "weekId": "2026-W31",
       "weekLabel": "2026年第31周 (7/28 - 8/1)",
