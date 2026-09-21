@@ -1,6 +1,111 @@
 {
-  "updated": "2026-09-18T12:23:53.372722",
-  "date": "2026-09-18",
+  "updated": "2026-09-21T14:35:10.005454",
+  "date": "2026-09-21",
   "market_status": "已收盘",
-  "picks": []
+  "picks": [
+    {
+      "code": "688137",
+      "name": "近岸蛋白",
+      "price": 118.84,
+      "changePct": 20.0,
+      "amount": 10.9,
+      "turnover": 0,
+      "mcap": 83.1,
+      "score": 75.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 1
+    },
+    {
+      "code": "688112",
+      "name": "鼎阳科技",
+      "price": 91.79,
+      "changePct": 20.0,
+      "amount": 9.4,
+      "turnover": 0,
+      "mcap": 146.5,
+      "score": 74.9,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 2
+    },
+    {
+      "code": "300642",
+      "name": "透景生命",
+      "price": 20.35,
+      "changePct": 19.99,
+      "amount": 6.9,
+      "turnover": 0,
+      "mcap": 33.0,
+      "score": 74.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 3
+    },
+    {
+      "code": "300691",
+      "name": "联合光电",
+      "price": 17.76,
+      "changePct": 20.0,
+      "amount": 5.0,
+      "turnover": 0,
+      "mcap": 47.8,
+      "score": 74.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 4
+    },
+    {
+      "code": "688026",
+      "name": "洁特生物",
+      "price": 25.22,
+      "changePct": 19.98,
+      "amount": 4.0,
+      "turnover": 0,
+      "mcap": 35.4,
+      "score": 73.8,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 5
+    },
+    {
+      "code": "688315",
+      "name": "诺禾致源",
+      "price": 18.18,
+      "changePct": 20.0,
+      "amount": 3.2,
+      "turnover": 0,
+      "mcap": 75.7,
+      "score": 73.5,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 6
+    },
+    {
+      "code": "688176",
+      "name": "亚虹医药-U",
+      "price": 14.73,
+      "changePct": 15.98,
+      "amount": 5.2,
+      "turnover": 0,
+      "mcap": 84.3,
+      "score": 66.1,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 7
+    },
+    {
+      "code": "301008",
+      "name": "宏昌科技",
+      "price": 52.09,
+      "changePct": 15.22,
+      "amount": 12.0,
+      "turnover": 0,
+      "mcap": 68.2,
+      "score": 65.7,
+      "sector": "",
+      "signal": "强势突破+盘中冲高",
+      "rank": 8
+    }
+  ]
 }
