@@ -1,5 +1,5 @@
 const STOCK_DATA = {
-  "lastUpdated": "2026-08-28T21:30:07.244471Z",
+  "lastUpdated": "2026-11-27T20:11:26.193611Z",
   "trackedStocks": [
     {
       "name": "银轮股份",
@@ -63,11 +63,11 @@ const STOCK_DATA = {
     }
   ],
   "currentWeek": {
-    "weekLabel": "2026年第35周 (8/24 - 8/28)",
-    "weekId": "2026-W35",
+    "weekLabel": "2026年第48周 (11/23 - 11/27)",
+    "weekId": "2026-W48",
     "topPick": {
-      "name": "sh.000122",
-      "code": "000122",
+      "name": "sh.000039",
+      "code": "000039",
       "sector": "量化精选",
       "rating": "强烈推荐",
       "price": 50.0,
@@ -95,8 +95,8 @@ const STOCK_DATA = {
     },
     "secondaryPicks": [
       {
-        "name": "sh.000807",
-        "code": "000807",
+        "name": "sh.000935",
+        "code": "000935",
         "sector": "量化精选",
         "rating": "关注",
         "badge": "watch",
@@ -112,8 +112,8 @@ const STOCK_DATA = {
         "thesis": "量化策略评分第2名。1个策略选中。"
       },
       {
-        "name": "sh.000035",
-        "code": "000035",
+        "name": "sh.000111",
+        "code": "000111",
         "sector": "量化精选",
         "rating": "关注",
         "badge": "watch",
@@ -129,8 +129,8 @@ const STOCK_DATA = {
         "thesis": "量化策略评分第3名。1个策略选中。"
       },
       {
-        "name": "sh.000126",
-        "code": "000126",
+        "name": "sh.000077",
+        "code": "000077",
         "sector": "量化精选",
         "rating": "关注",
         "badge": "watch",
@@ -148,6 +148,45 @@ const STOCK_DATA = {
     ]
   },
   "history": [
+    {
+      "weekId": "2026-W35",
+      "weekLabel": "2026年第35周 (8/24 - 8/28)",
+      "topPick": "sh.000122",
+      "picks": [
+        {
+          "name": "sh.000122",
+          "code": "000122",
+          "sector": "量化精选",
+          "entryPrice": 50.0,
+          "currentPrice": 50.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000807",
+          "code": "000807",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000035",
+          "code": "000035",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        },
+        {
+          "name": "sh.000126",
+          "code": "000126",
+          "sector": "量化精选",
+          "entryPrice": 30.0,
+          "currentPrice": 30.0,
+          "perf": "0.0%"
+        }
+      ]
+    },
     {
       "weekId": "2026-W31",
       "weekLabel": "2026年第31周 (7/27 - 7/31)",
